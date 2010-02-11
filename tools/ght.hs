@@ -33,7 +33,7 @@ ghtShowPrefixHandler = do
 			cwd <- liftIO $ getCurrentDirectory
 			canPath <- liftIO $ canonicalizePath path
 			let relPath = makeRelative canPath cwd
-			liftIO $ putStrLn relPath
+			liftIO $ putStrLn (relPath ++ [pathSeparator])
 		Nothing -> liftIO $ putStrLn "fatal: Not a git repository (or any of the parent directories)"
 
 ------------------------------------------------------------
@@ -52,7 +52,7 @@ ghtShowRoot = defCmd {
 ghtShowRootHandler = do
 	mp <- liftIO $ findRoot "."
 	case mp of
-		Just p -> liftIO $ putStrLn p
+		Just path -> liftIO $ putStrLn (path ++ [pathSeparator])
 		Nothing -> liftIO $ putStrLn "fatal: Not a git repository (or any of the parent directories)"
 
 findRoot :: FilePath -> IO (Maybe FilePath)
