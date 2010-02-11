@@ -1,0 +1,19 @@
+Name:                ght
+Version:             0.1.0
+License:             GPL
+Author:              Conrad Parker <conrad@metadecks.org>
+Category:            Development
+Synopsis:            Git version control system
+Description:         This is a Haskell clone of the Git version control system.
+Stability:           experimental
+Build-Type:          Simple
+Cabal-Version:       >= 1.2
+
+------------------------------------------------------------
+-- ght tool
+--
+
+Executable ght
+    Main-Is:         ght.hs
+    Hs-Source-Dirs:  ., tools
+    Build-Depends:   base, data-default, transformers, ui-command
