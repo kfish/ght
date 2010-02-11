@@ -16,4 +16,4 @@ Cabal-Version:       >= 1.2
 Executable ght
     Main-Is:         ght.hs
     Hs-Source-Dirs:  ., tools
-    Build-Depends:   base, data-default, transformers, ui-command
+    Build-Depends:   base, data-default, transformers, ui-command, unix, directory, filepath

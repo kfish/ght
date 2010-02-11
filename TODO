@@ -2,8 +2,6 @@
 Git wrangling
 -------------
 
-1. Find the current .git directory (by traversing parent dirs)
-
 2. show prefix (of current dir within repo)
 
 3. parse .git/config
