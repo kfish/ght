@@ -2,8 +2,6 @@
 Git wrangling
 -------------
 
-2. show prefix (of current dir within repo)
-
 3. parse .git/config
 
 4. find ~/.gitconfig

@@ -8,13 +8,37 @@ import Data.List (intersperse)
 
 import UI.Command
 
-------------------------------------------------------------
--- show-root
---
-
+-- show-prefix, show-root use these
 import System.FilePath hiding (normalise)
 import System.Directory
 import System.Posix.Files
+
+------------------------------------------------------------
+-- show-prefix
+--
+
+ghtShowPrefix :: Command ()
+
+ghtShowPrefix = defCmd {
+       	        cmdName = "show-prefix",
+                cmdHandler = ghtShowPrefixHandler,
+                cmdCategory = "Reporting",
+                cmdShortDesc = "Show path from top-level directory of repo"
+        }
+
+ghtShowPrefixHandler = do
+	mp <- liftIO $ findRoot "."
+	case mp of
+		Just path -> do
+			cwd <- liftIO $ getCurrentDirectory
+			canPath <- liftIO $ canonicalizePath path
+			let relPath = makeRelative canPath cwd
+			liftIO $ putStrLn relPath
+		Nothing -> liftIO $ putStrLn "fatal: Not a git repository (or any of the parent directories)"
+
+------------------------------------------------------------
+-- show-root
+--
 
 ghtShowRoot :: Command ()
 
@@ -155,7 +179,7 @@ ght = def {
 	        appCategories = ["Reporting", "Patch handling"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowRoot, ghtLog, ghtFormatPatch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtLog, ghtFormatPatch]
 	}
 
 longDesc = "A clone of the git revision control system."
