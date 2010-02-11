@@ -1,0 +1,27 @@
+
+Git wrangling
+-------------
+
+1. Find the current .git directory (by traversing parent dirs)
+
+2. show prefix (of current dir within repo)
+
+3. parse .git/config
+
+4. find ~/.gitconfig
+
+7. Interpret .git/objects/pack/*.pack files:
+
+0000000: 5041 434b 0000 0002 0000 1745 9915 789c  PACK.......E..x.
+
+objects/pack/pack-03dd807efaffb1084f2a314ee633591a21f9166e.pack: Git
+pack, version 2, 5957 objects
+
+(0x1745 = 5957)
+
+Haskell cruft
+-------------
+
+Use Data.Binary for reading
+
+Use a left-fold enumerator for following branch histories
