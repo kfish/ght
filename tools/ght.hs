@@ -194,9 +194,22 @@ ghtShow = defCmd {
 
 ghtShowHandler = do
         args <- appArgs
-        liftIO $ showBlob args
+        liftIO $ showName args
 
-showBlob [] = defRev
+showName [] = defRev
+
+showName (name:_) = do
+	mPath <- firstExist [name,
+                            ("refs" </> name),
+                            ("refs" </> "tags" </> name),
+                            ("refs" </> "heads" </> name),
+                            ("refs" </> "remotes" </> name),
+                            ("refs" </> "remotes" </> name </> "HEAD")]
+	case mPath of
+		Just path -> do
+			bs <- derefFile path
+			showBlob [C.unpack bs]
+		Nothing -> showBlob [name]
 	
 showBlob (blob:_) = do
         let (bH,bT) = splitAt 2 blob
@@ -221,6 +234,13 @@ deref bs
 		refPath = C.unpack (chomp $ L.drop 5 bs)
 
 chomp = C.takeWhile (/= '\n')
+
+firstExist :: [FilePath] -> IO (Maybe FilePath)
+firstExist [] = return Nothing
+firstExist (f:fs) = do
+	p <- gitPath f
+	b <- fileExist p
+	if b then return (Just f) else firstExist fs
 
 ------------------------------------------------------------
 -- hash-object
