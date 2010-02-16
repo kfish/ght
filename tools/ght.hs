@@ -153,13 +153,11 @@ ghtShow = defCmd {
         }
 
 ghtShowHandler = do
-        args <- appArgs
-        when (args == []) $ return ()
-	let blob = head args
+        (blob:_) <- appArgs
         liftIO $ showBlob blob
 	
 showBlob blob = do
-	root <- liftIO $ findRoot
+	root <- findRoot
         let (bH,bT) = splitAt 2 blob
         let path = root </> ".git" </> "objects" </> bH </> bT
 	b <- L.readFile path
@@ -178,9 +176,7 @@ ghtHashObject = defCmd {
         }
 
 ghtHashObjectHandler = do
-        args <- appArgs
-        when (args == []) $ return ()
-	let path = head args
+        (path:_) <- appArgs
 	liftIO $ hashFile path
 
 hashFile path = do
