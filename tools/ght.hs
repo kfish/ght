@@ -13,6 +13,11 @@ import System.FilePath hiding (normalise)
 import System.Directory
 import System.Posix.Files
 
+-- show
+import System.IO (stdout)
+import Codec.Compression.Zlib
+import qualified Data.ByteString.Lazy as L
+
 ------------------------------------------------------------
 -- show-prefix
 --
@@ -146,13 +151,17 @@ ghtShow = defCmd {
         }
 
 ghtShowHandler = do
-	root <- liftIO $ findRoot
         args <- appArgs
         when (args == []) $ return ()
 	let blob = head args
+        liftIO $ showBlob blob
+	
+showBlob blob = do
+	root <- liftIO $ findRoot
         let (bH,bT) = splitAt 2 blob
         let path = root </> ".git" </> "objects" </> bH </> bT
-        liftIO $ putStrLn path
+	b <- L.readFile path
+	L.hPut stdout (decompress b)
 
 {-
 ------------------------------------------------------------

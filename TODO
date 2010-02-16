@@ -7,11 +7,6 @@ Config
 parse .git/config
 find ~/.gitconfig
 
-Blobs
------
-
-uncompress blobs (ght show)
-
 Pack files
 ----------
 Interpret .git/objects/pack/*.pack files:
