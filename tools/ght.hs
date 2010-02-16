@@ -160,8 +160,7 @@ ghtShowHandler = do
         args <- appArgs
         liftIO $ showBlob args
 
-showBlob [] = do
-	putStrLn "Show default revision"
+showBlob [] = defRev
 	
 showBlob (blob:_) = do
 	root <- findRoot
@@ -169,6 +168,25 @@ showBlob (blob:_) = do
         let path = root </> ".git" </> "objects" </> bH </> bT
 	b <- L.readFile path
 	L.hPut stdout (decompress b)
+
+defRev = do
+        bs <- derefFile "HEAD"
+	showBlob [C.unpack bs]
+
+derefFile f = do
+	root <- findRoot
+	let path = root </> ".git" </> f
+	bs <- L.readFile path
+	deref bs
+
+deref bs
+	| refHeader `L.isPrefixOf` bs = derefFile refPath
+        | otherwise = return (chomp bs)
+        where
+		refHeader = C.pack "ref: "
+		refPath = C.unpack (chomp $ L.drop 5 bs)
+
+chomp = C.takeWhile (/= '\n')
 
 ------------------------------------------------------------
 -- hash-object
