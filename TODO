@@ -1,12 +1,21 @@
 
 Git wrangling
--------------
+=============
 
-3. parse .git/config
+Config
+------
+parse .git/config
+find ~/.gitconfig
 
-4. find ~/.gitconfig
+Blobs
+-----
 
-7. Interpret .git/objects/pack/*.pack files:
+find blob files
+uncompress blobs (ght show)
+
+Pack files
+----------
+Interpret .git/objects/pack/*.pack files:
 
 0000000: 5041 434b 0000 0002 0000 1745 9915 789c  PACK.......E..x.
 
