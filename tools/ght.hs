@@ -17,6 +17,8 @@ import System.Posix.Files
 import System.IO (stdout)
 import Codec.Compression.Zlib
 import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Lazy.Char8 as C
+import Data.Digest.Pure.SHA (sha1, showDigest)
 
 ------------------------------------------------------------
 -- show-prefix
@@ -145,7 +147,7 @@ normaliseDrive = id
 ghtShow = defCmd {
        	        cmdName = "show",
                 cmdHandler = ghtShowHandler,
-                cmdCategory = "Blob inspection",
+                cmdCategory = "Blob management",
                 cmdShortDesc = "show a blob",
                 cmdExamples = [("Show contents of blob deadbeef", "deadbeef")]
         }
@@ -162,6 +164,33 @@ showBlob blob = do
         let path = root </> ".git" </> "objects" </> bH </> bT
 	b <- L.readFile path
 	L.hPut stdout (decompress b)
+
+------------------------------------------------------------
+-- hash-object
+--
+
+ghtHashObject = defCmd {
+       	        cmdName = "hash-object",
+                cmdHandler = ghtHashObjectHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Compute object ID from a file",
+                cmdExamples = [("Compute the object ID of file.c", "file.c")]
+        }
+
+ghtHashObjectHandler = do
+        args <- appArgs
+        when (args == []) $ return ()
+	let path = head args
+	liftIO $ hashFile path
+
+hashFile path = do
+        b <- L.readFile path
+	status <- getFileStatus path	
+	let h = C.pack $ "blob " ++ (show $ fileSize status)
+	let t = h `L.append` (L.singleton 0x0) `L.append` b
+        putStrLn $ showHash t
+
+showHash = showDigest . sha1
 
 {-
 ------------------------------------------------------------
@@ -209,10 +238,10 @@ ght = def {
                 appBugEmail = "conrad@metadecks.org",
                 appShortDesc = "Trivial git inspection tools",
                 appLongDesc = longDesc,
-	        appCategories = ["Reporting", "Blob inspection"],
+	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtHashObject]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."

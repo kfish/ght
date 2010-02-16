@@ -16,7 +16,7 @@ show HEAD reference
 SHA1
 ----
 
-verify / generate blob sha1sums
+verify blob sha1sums
 
 Logs
 ----
