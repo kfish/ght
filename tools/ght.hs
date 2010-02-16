@@ -132,6 +132,7 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
 normaliseDrive = id
 
 
+{-
 ------------------------------------------------------------
 -- log
 --
@@ -163,6 +164,7 @@ ghtFormatPatchHandler = do
         args <- appArgs
         when (args == []) $ return ()
         liftIO $ putStrLn $ concat . intersperse " " $ take (read $ head args) (repeat "patch!")
+-}
 
 ------------------------------------------------------------
 -- The Application
@@ -179,7 +181,7 @@ ght = def {
 	        appCategories = ["Reporting", "Patch handling"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtLog, ghtFormatPatch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
