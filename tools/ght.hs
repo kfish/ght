@@ -27,14 +27,11 @@ ghtShowPrefix = defCmd {
         }
 
 ghtShowPrefixHandler = do
-	mp <- liftIO $ findRoot "."
-	case mp of
-		Just path -> do
-			cwd <- liftIO $ getCurrentDirectory
-			canPath <- liftIO $ canonicalizePath path
-			let relPath = makeRelative canPath cwd
-			liftIO $ putStrLn (relPath ++ [pathSeparator])
-		Nothing -> liftIO $ putStrLn "fatal: Not a git repository (or any of the parent directories)"
+	path <- liftIO findRoot
+	cwd <- liftIO $ getCurrentDirectory
+	canPath <- liftIO $ canonicalizePath path
+	let relPath = makeRelative canPath cwd
+	liftIO $ putStrLn (relPath ++ [pathSeparator])
 
 ------------------------------------------------------------
 -- show-root
@@ -50,13 +47,18 @@ ghtShowRoot = defCmd {
         }
 
 ghtShowRootHandler = do
-	mp <- liftIO $ findRoot "."
-	case mp of
-		Just path -> liftIO $ putStrLn (path ++ [pathSeparator])
-		Nothing -> liftIO $ putStrLn "fatal: Not a git repository (or any of the parent directories)"
+	path <- liftIO findRoot
+	liftIO $ putStrLn path
 
-findRoot :: FilePath -> IO (Maybe FilePath)
-findRoot path = do
+findRoot :: IO FilePath
+findRoot = do
+	mp <- liftIO $ findRoot' "."
+	case mp of
+		Just path -> return (path ++ [pathSeparator])
+		Nothing -> error "fatal: Not a git repository (or any of the parent directories)"
+
+findRoot' :: FilePath -> IO (Maybe FilePath)
+findRoot' path = do
 	b <- fileExist path
 	case b of
 		True -> do
@@ -69,7 +71,7 @@ findRoot path = do
 					canNewPath <- canonicalizePath newPath
 					if (canPath == canNewPath) then
 						return Nothing
-						else findRoot newPath
+						else findRoot' newPath
 		False -> return Nothing
 	
 dirIsRoot path = do
