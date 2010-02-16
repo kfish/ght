@@ -7,6 +7,12 @@ Config
 parse .git/config
 find ~/.gitconfig
 
+Branches
+--------
+
+list branches
+show HEAD reference
+
 Pack files
 ----------
 Interpret .git/objects/pack/*.pack files:
@@ -19,7 +25,7 @@ pack, version 2, 5957 objects
 (0x1745 = 5957)
 
 Haskell cruft
--------------
+=============
 
 Use Data.Binary for reading
 
