@@ -7,11 +7,6 @@ Config
 parse .git/config
 find ~/.gitconfig
 
-Branches
---------
-
-show HEAD reference
-
 SHA1
 ----
 

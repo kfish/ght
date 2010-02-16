@@ -4,7 +4,7 @@ import Control.Monad (liftM, when)
 import Control.Monad.Trans (liftIO)
 
 import Data.Default
-import Data.List (intersperse)
+import Data.List (intersperse, sort)
 
 import UI.Command
 
@@ -165,7 +165,15 @@ showBranches _ = do
 	branches <- getDirectoryContents $ root </> ".git" </> "refs" </> "heads"
 	let branches' = filter (/= ".") branches
 	let branches'' = filter (/= "..") branches'
-	mapM_ (\x -> putStrLn ("  " ++ x)) branches''
+	hd <- derefFile "HEAD"
+	mapM_ (showBranch hd) (sort branches'')
+
+showBranch hd b = do
+	ref <- derefFile $ "refs" </> "heads" </> b
+	if (ref == hd) then
+		putStr "* "
+		else putStr "  "
+	putStrLn b
 
 ------------------------------------------------------------
 -- show
