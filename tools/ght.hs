@@ -61,6 +61,11 @@ ghtShowRootHandler = do
 -- findRoot
 --
 
+gitPath :: FilePath -> IO FilePath
+gitPath f = do
+	root <- findRoot
+	return $ root </> ".git" </> f
+
 findRoot :: IO FilePath
 findRoot = do
 	mp <- liftIO $ findRoot' "."
@@ -161,8 +166,8 @@ ghtBranchHandler = do
         liftIO $ showBranches args
 
 showBranches _ = do
-	root <- findRoot
-	branches <- getDirectoryContents $ root </> ".git" </> "refs" </> "heads"
+	path <- gitPath $ "refs" </> "heads"
+	branches <- getDirectoryContents path
 	let branches' = filter (/= ".") branches
 	let branches'' = filter (/= "..") branches'
 	hd <- derefFile "HEAD"
@@ -194,9 +199,8 @@ ghtShowHandler = do
 showBlob [] = defRev
 	
 showBlob (blob:_) = do
-	root <- findRoot
         let (bH,bT) = splitAt 2 blob
-        let path = root </> ".git" </> "objects" </> bH </> bT
+        path <- gitPath ("objects" </> bH </> bT)
 	b <- L.readFile path
 	L.hPut stdout (decompress b)
 
@@ -205,8 +209,7 @@ defRev = do
 	showBlob [C.unpack bs]
 
 derefFile f = do
-	root <- findRoot
-	let path = root </> ".git" </> f
+	path <- gitPath f
 	bs <- L.readFile path
 	deref bs
 
