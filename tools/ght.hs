@@ -133,6 +133,26 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
 --joinDrive = ++
 normaliseDrive = id
 
+------------------------------------------------------------
+-- show
+--
+
+ghtShow = defCmd {
+       	        cmdName = "show",
+                cmdHandler = ghtShowHandler,
+                cmdCategory = "Blob inspection",
+                cmdShortDesc = "show a blob",
+                cmdExamples = [("Show contents of blob deadbeef", "deadbeef")]
+        }
+
+ghtShowHandler = do
+	root <- liftIO $ findRoot
+        args <- appArgs
+        when (args == []) $ return ()
+	let blob = head args
+        let (bH,bT) = splitAt 2 blob
+        let path = root </> ".git" </> "objects" </> bH </> bT
+        liftIO $ putStrLn path
 
 {-
 ------------------------------------------------------------
@@ -180,10 +200,10 @@ ght = def {
                 appBugEmail = "conrad@metadecks.org",
                 appShortDesc = "Trivial git inspection tools",
                 appLongDesc = longDesc,
-	        appCategories = ["Reporting", "Patch handling"],
+	        appCategories = ["Reporting", "Blob inspection"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."

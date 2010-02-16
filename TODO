@@ -10,7 +10,6 @@ find ~/.gitconfig
 Blobs
 -----
 
-find blob files
 uncompress blobs (ght show)
 
 Pack files
