@@ -188,8 +188,8 @@ ghtShow = defCmd {
        	        cmdName = "show",
                 cmdHandler = ghtShowHandler,
                 cmdCategory = "Blob management",
-                cmdShortDesc = "show a blob",
-                cmdExamples = [("Show contents of blob deadbeef", "deadbeef")]
+                cmdShortDesc = "Show an object",
+                cmdExamples = [("Show contents of blob deadbeef", "deadbeef"), ("Show contents of branch feature1", "feature1")]
         }
 
 ghtShowHandler = do
