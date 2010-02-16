@@ -3,8 +3,9 @@ Version:             0.1.0
 License:             GPL
 Author:              Conrad Parker <conrad@metadecks.org>
 Category:            Development
-Synopsis:            Git version control system
-Description:         This is a Haskell clone of the Git version control system.
+Synopsis:            Trivial routines for inspecting git repositories
+Description:         This is a bunch of trivial routines for inspecting git
+                     repositories. It is in no way useful beyond that.
 Stability:           experimental
 Build-Type:          Simple
 Cabal-Version:       >= 1.2

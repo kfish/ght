@@ -172,9 +172,9 @@ ght :: Application () ()
 ght = def {
 	        appName = "ght",
                 appVersion = "0.1",
-		appAuthors = ["Joe R. Hacker"],
-                appBugEmail = "bugs@example.com",
-                appShortDesc = "Ght revision control system",
+		appAuthors = ["Conrad Parker"],
+                appBugEmail = "conrad@metadecks.org",
+                appShortDesc = "Trivial git inspection tools",
                 appLongDesc = longDesc,
 	        appCategories = ["Reporting", "Patch handling"],
 		appSeeAlso = ["git"],
@@ -182,7 +182,7 @@ ght = def {
 	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtLog, ghtFormatPatch]
 	}
 
-longDesc = "A clone of the git revision control system."
+longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
 
 ------------------------------------------------------------
 -- Main
