@@ -13,6 +13,16 @@ Branches
 list branches
 show HEAD reference
 
+SHA1
+----
+
+verify / generate blob sha1sums
+
+Logs
+----
+
+Follow parents of commits
+
 Pack files
 ----------
 Interpret .git/objects/pack/*.pack files:
