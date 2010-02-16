@@ -16,7 +16,17 @@ show HEAD reference
 SHA1
 ----
 
+expand sha1 prefix into full matching sha1
 verify blob sha1sums
+
+Revision names
+--------------
+
+Handle A^
+Handle A^^
+Handle A~n
+Handle A^^n
+Handle A^n^m
 
 Logs
 ----
