@@ -153,10 +153,13 @@ ghtShow = defCmd {
         }
 
 ghtShowHandler = do
-        (blob:_) <- appArgs
-        liftIO $ showBlob blob
+        args <- appArgs
+        liftIO $ showBlob args
+
+showBlob [] = do
+	putStrLn "Show default revision"
 	
-showBlob blob = do
+showBlob (blob:_) = do
 	root <- findRoot
         let (bH,bT) = splitAt 2 blob
         let path = root </> ".git" </> "objects" </> bH </> bT
@@ -176,10 +179,12 @@ ghtHashObject = defCmd {
         }
 
 ghtHashObjectHandler = do
-        (path:_) <- appArgs
-	liftIO $ hashFile path
+        args <- appArgs
+	liftIO $ hashFile args
 
-hashFile path = do
+hashFile [] = return ()
+
+hashFile (path:_) = do
         b <- L.readFile path
 	status <- getFileStatus path	
 	let h = C.pack $ "blob " ++ (show $ fileSize status)
