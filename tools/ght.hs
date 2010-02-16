@@ -57,6 +57,10 @@ ghtShowRootHandler = do
 	path <- liftIO findRoot
 	liftIO $ putStrLn path
 
+------------------------------------------------------------
+-- findRoot
+--
+
 findRoot :: IO FilePath
 findRoot = do
 	mp <- liftIO $ findRoot' "."
@@ -192,40 +196,6 @@ hashFile (path:_) = do
         putStrLn $ showHash t
 
 showHash = showDigest . sha1
-
-{-
-------------------------------------------------------------
--- log
---
-
-ghtLog :: Command ()
-
-ghtLog = defCmd {
-       	        cmdName = "log",
-                cmdHandler = ghtLogHandler,
-                cmdCategory = "Reporting",
-                cmdShortDesc = "Show commit logs"
-        }
-
-ghtLogHandler = liftIO $ putStrLn "Hello log!"
-
-------------------------------------------------------------
--- formatPatch
---
-
-ghtFormatPatch = defCmd {
-       	        cmdName = "format-patch",
-                cmdHandler = ghtFormatPatchHandler,
-                cmdCategory = "Patch handling",
-                cmdShortDesc = "Prepare patches for e-mail submission",
-                cmdExamples = [("Create 7 patches", "7"), ("Create 3 patches", "3")]
-        }
-
-ghtFormatPatchHandler = do
-        args <- appArgs
-        when (args == []) $ return ()
-        liftIO $ putStrLn $ concat . intersperse " " $ take (read $ head args) (repeat "patch!")
--}
 
 ------------------------------------------------------------
 -- The Application
