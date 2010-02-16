@@ -10,7 +10,6 @@ find ~/.gitconfig
 Branches
 --------
 
-list branches
 show HEAD reference
 
 SHA1

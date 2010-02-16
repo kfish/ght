@@ -145,6 +145,29 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
 normaliseDrive = id
 
 ------------------------------------------------------------
+-- branch
+--
+
+ghtBranch = defCmd {
+       	        cmdName = "branch",
+                cmdHandler = ghtBranchHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "show branches",
+                cmdExamples = [("Show branches available", "")]
+        }
+
+ghtBranchHandler = do
+        args <- appArgs
+        liftIO $ showBranches args
+
+showBranches _ = do
+	root <- findRoot
+	branches <- getDirectoryContents $ root </> ".git" </> "refs" </> "heads"
+	let branches' = filter (/= ".") branches
+	let branches'' = filter (/= "..") branches'
+	mapM_ (\x -> putStrLn ("  " ++ x)) branches''
+
+------------------------------------------------------------
 -- show
 --
 
@@ -230,7 +253,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtHashObject]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
