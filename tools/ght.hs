@@ -8,6 +8,8 @@ import Data.List (intersperse, sort)
 
 import UI.Command
 
+import Git.Commit
+
 -- show-prefix, show-root use these
 import System.FilePath hiding (normalise)
 import System.Directory
@@ -215,7 +217,14 @@ showBlob (blob:_) = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
 	b <- L.readFile path
-	L.hPut stdout (decompress b)
+	let pb = prettyBlob blob (decompress b)
+	L.hPut stdout pb
+
+prettyBlob blob bs
+	| commitHeader `L.isPrefixOf` bs = C.concat [commitHeader, C.pack (blob ++ "\n"), commitPretty $ commitParse bs]
+        | otherwise = chomp bs
+	where
+		commitHeader = C.pack "commit "
 
 defRev = do
         bs <- derefFile "HEAD"
