@@ -183,6 +183,48 @@ showBranch hd b = do
 	putStrLn b
 
 ------------------------------------------------------------
+-- log
+--
+
+ghtLog = defCmd {
+       	        cmdName = "log",
+                cmdHandler = ghtLogHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Show commit logs",
+                cmdExamples = [("Show log of current branch", ""), ("Show log of branch feature1", "feature1")]
+        }
+
+ghtLogHandler = do
+        args <- appArgs
+        liftIO $ showName args
+
+------------------------------------------------------------
+-- findBlob
+--
+
+findBlob [] = findBlob ["HEAD"]
+
+findBlob (name:_) = do
+	mPath <- firstExist [name,
+                            ("refs" </> name),
+                            ("refs" </> "tags" </> name),
+                            ("refs" </> "heads" </> name),
+                            ("refs" </> "remotes" </> name),
+                            ("refs" </> "remotes" </> name </> "HEAD")]
+	case mPath of
+		Just path -> do
+			bs <- derefFile path
+			return [C.unpack bs]
+		Nothing -> return [name]
+
+firstExist :: [FilePath] -> IO (Maybe FilePath)
+firstExist [] = return Nothing
+firstExist (f:fs) = do
+	p <- gitPath f
+	b <- fileExist p
+	if b then return (Just f) else firstExist fs
+
+------------------------------------------------------------
 -- show
 --
 
@@ -198,21 +240,10 @@ ghtShowHandler = do
         args <- appArgs
         liftIO $ showName args
 
-showName [] = defRev
+showName ns = do
+	b <- findBlob ns
+	showBlob b
 
-showName (name:_) = do
-	mPath <- firstExist [name,
-                            ("refs" </> name),
-                            ("refs" </> "tags" </> name),
-                            ("refs" </> "heads" </> name),
-                            ("refs" </> "remotes" </> name),
-                            ("refs" </> "remotes" </> name </> "HEAD")]
-	case mPath of
-		Just path -> do
-			bs <- derefFile path
-			showBlob [C.unpack bs]
-		Nothing -> showBlob [name]
-	
 showBlob (blob:_) = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
@@ -225,10 +256,6 @@ prettyBlob blob bs
         | otherwise = chomp bs
 	where
 		commitHeader = C.pack "commit "
-
-defRev = do
-        bs <- derefFile "HEAD"
-	showBlob [C.unpack bs]
 
 derefFile f = do
 	path <- gitPath f
@@ -243,13 +270,6 @@ deref bs
 		refPath = C.unpack (chomp $ L.drop 5 bs)
 
 chomp = C.takeWhile (/= '\n')
-
-firstExist :: [FilePath] -> IO (Maybe FilePath)
-firstExist [] = return Nothing
-firstExist (f:fs) = do
-	p <- gitPath f
-	b <- fileExist p
-	if b then return (Just f) else firstExist fs
 
 ------------------------------------------------------------
 -- hash-object
@@ -293,7 +313,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
