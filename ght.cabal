@@ -11,6 +11,11 @@ Build-Type:          Simple
 Cabal-Version:       >= 1.2
 
 ------------------------------------------------------------
+library
+    Build-Depends: base, data-default, bytestring, SHA
+    Exposed-Modules: Git.Commit
+
+------------------------------------------------------------
 -- ght tool
 --
 
