@@ -183,22 +183,6 @@ showBranch hd b = do
 	putStrLn b
 
 ------------------------------------------------------------
--- log
---
-
-ghtLog = defCmd {
-       	        cmdName = "log",
-                cmdHandler = ghtLogHandler,
-                cmdCategory = "Blob management",
-                cmdShortDesc = "Show commit logs",
-                cmdExamples = [("Show log of current branch", ""), ("Show log of branch feature1", "feature1")]
-        }
-
-ghtLogHandler = do
-        args <- appArgs
-        liftIO $ showName args
-
-------------------------------------------------------------
 -- findBlob
 --
 
@@ -225,6 +209,44 @@ firstExist (f:fs) = do
 	if b then return (Just f) else firstExist fs
 
 ------------------------------------------------------------
+-- log
+--
+
+ghtLog = defCmd {
+       	        cmdName = "log",
+                cmdHandler = ghtLogHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Show commit logs",
+                cmdExamples = [("Show log of current branch", ""), ("Show log of branch feature1", "feature1")]
+        }
+
+ghtLogHandler = do
+        args <- appArgs
+	b <- liftIO $ findBlob args
+	liftIO $ showLog b
+
+showLog (blob:_)
+	| blob == "" = return ()
+	| otherwise = do
+		d <- readBlob blob
+		let m'pb = prettyLog blob d
+		case m'pb of
+			Just c -> do
+				let p = C.concat [commitHeader, C.pack (blob ++ "\n"), commitPretty c]
+				L.hPut stdout p
+				showLog [C.unpack $ commitParent c]
+			Nothing -> return ()
+	where
+		commitHeader = C.pack "commit "
+
+prettyLog blob bs
+	| commitHeader `L.isPrefixOf` bs = Just c
+        | otherwise = Nothing
+	where
+		commitHeader = C.pack "commit "
+		c = commitParse bs
+
+------------------------------------------------------------
 -- show
 --
 
@@ -238,17 +260,18 @@ ghtShow = defCmd {
 
 ghtShowHandler = do
         args <- appArgs
-        liftIO $ showName args
+	b <- liftIO $ findBlob args
+	liftIO $ showBlob b
 
-showName ns = do
-	b <- findBlob ns
-	showBlob b
-
-showBlob (blob:_) = do
+readBlob blob = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
 	b <- L.readFile path
-	let pb = prettyBlob blob (decompress b)
+	return (decompress b)
+
+showBlob (blob:_) = do
+	d <- readBlob blob
+	let pb = prettyBlob blob d
 	L.hPut stdout pb
 
 prettyBlob blob bs
