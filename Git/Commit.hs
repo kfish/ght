@@ -37,16 +37,16 @@ commitParseLines c (l:ls)
 	| otherwise = commitParseLines (commitModLine c l) ls
 
 commitModLine c l = commitMod c (C.unpack hd) bdy
-	where (hd, bdy) = C.span (/= ' ') l
+	where (hd:bdy) = C.words l
 
 commitMod c hd bdy
 	| hd == "commit" = c
-	| hd == "parent" = c{commitParent = bdy}
+	| hd == "parent" = c{commitParent = head bdy}
 	| hd == "author" = c{commitAuthor = pName, commitAuthorDate = t}
 	| hd == "committer" = c{commitCommitter = pName, commitCommitterDate = t}
 	| otherwise = c
 	where
-		(pTZ:pTime:pAs) = reverse $ C.words bdy
+		(pTZ:pTime:pAs) = reverse bdy
 		pName = C.unwords $ reverse pAs
 		t = C.unwords [pTime, pTZ]
 
