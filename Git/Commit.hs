@@ -62,11 +62,12 @@ commitMod c hd bdy
 commitPretty (Commit p a ad c cd m) =
 	C.unlines [
 		C.concat [(C.pack "Author: "), a],
-		C.concat [(C.pack "Date:   "), C.pack (show l)],
+		C.concat [(C.pack "Date:   "), f],
 		C.empty,
 		m
 	]
 	where
 		[ps, tz] = map C.unpack $ C.words ad
 		s = readTime defaultTimeLocale "%s" ps
-		l = utcToZonedTime (read tz) s
+		z = utcToZonedTime (read tz) s
+		f = C.pack $ formatTime defaultTimeLocale "%c" z

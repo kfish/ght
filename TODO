@@ -13,11 +13,6 @@ SHA1
 expand sha1 prefix into full matching sha1
 verify blob sha1sums
 
-Dates
------
-
-pretty print dates
-
 Revision names
 --------------
 
