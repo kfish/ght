@@ -12,7 +12,7 @@ Cabal-Version:       >= 1.2
 
 ------------------------------------------------------------
 library
-    Build-Depends: base, data-default, bytestring, SHA
+    Build-Depends: base, data-default, bytestring, SHA, old-locale, time
     Exposed-Modules: Git.Commit
 
 ------------------------------------------------------------
