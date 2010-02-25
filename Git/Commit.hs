@@ -9,6 +9,7 @@ import Data.Digest.Pure.SHA (Digest, sha1, showDigest)
 
 import Data.Time.Clock
 import Data.Time.Format
+import Data.Time.LocalTime
 import System.Locale
 
 type Author = String
@@ -61,12 +62,11 @@ commitMod c hd bdy
 commitPretty (Commit p a ad c cd m) =
 	C.unlines [
 		C.concat [(C.pack "Author: "), a],
-		C.concat [(C.pack "Date:   "), C.pack (show s)],
+		C.concat [(C.pack "Date:   "), C.pack (show l)],
 		C.empty,
 		m
 	]
 	where
-		[psB, tzB] = C.words ad
-		ps = C.unpack psB
-		s :: UTCTime
+		[ps, tz] = map C.unpack $ C.words ad
 		s = readTime defaultTimeLocale "%s" ps
+		l = utcToZonedTime (read tz) s
