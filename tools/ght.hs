@@ -247,6 +247,27 @@ prettyLog blob bs
 		c = commitParse bs
 
 ------------------------------------------------------------
+-- show-raw
+--
+
+ghtShowRaw = defCmd {
+       	        cmdName = "show-raw",
+                cmdHandler = ghtShowRawHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Show the raw dump of an object",
+                cmdExamples = [("Show raw contents of blob deadbeef", "deadbeef"), ("Show raw contents of branch feature1", "feature1")]
+        }
+
+ghtShowRawHandler = do
+        args <- appArgs
+	b <- liftIO $ findBlob args
+	liftIO $ showRawBlob b
+
+showRawBlob (blob:_) = do
+	d <- readBlob blob
+	L.hPut stdout d
+
+------------------------------------------------------------
 -- show
 --
 
@@ -336,7 +357,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
