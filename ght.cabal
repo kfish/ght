@@ -12,8 +12,9 @@ Cabal-Version:       >= 1.2
 
 ------------------------------------------------------------
 library
-    Build-Depends: base, data-default, bytestring, SHA, old-locale, time
+    Build-Depends: base, data-default, bytestring, binary, SHA, old-locale, time
     Exposed-Modules: Git.Commit
+                     Git.Pack
 
 ------------------------------------------------------------
 -- ght tool

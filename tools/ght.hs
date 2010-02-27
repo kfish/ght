@@ -9,6 +9,7 @@ import Data.List (intersperse, sort)
 import UI.Command
 
 import Git.Commit
+import Git.Pack
 
 -- show-prefix, show-root use these
 import System.FilePath hiding (normalise)
@@ -247,6 +248,36 @@ prettyLog blob bs
 		c = commitParse bs
 
 ------------------------------------------------------------
+-- show-pack
+--
+
+ghtShowPack = defCmd {
+       	        cmdName = "show-pack",
+                cmdHandler = ghtShowPackHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Show the raw dump of a pack",
+                cmdExamples = [("Show raw contents of pack pack-abcd.pack", "abcd")]
+        }
+
+ghtShowPackHandler = do
+        args <- appArgs
+	b <- liftIO $ findPack args
+	-- liftIO $ L.hPut stdout b
+	let p = prettyPack b
+	liftIO $ L.hPut stdout p
+
+findPack (pack:_) = do
+	path <- gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
+	b <- L.readFile path
+	return b
+
+prettyPack bs
+	| packHeader `L.isPrefixOf` bs = packPretty $ packParse bs
+        | otherwise = error "Not a pack"
+	where
+		packHeader = C.pack "PACK"
+
+------------------------------------------------------------
 -- show-raw
 --
 
@@ -357,7 +388,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
