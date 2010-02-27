@@ -10,8 +10,8 @@ import Data.Binary.Get
 import Data.Word
 
 data Pack = Pack {
-	packVersion :: Word32
-	-- packNumObjects :: Word32
+	packVersion :: Word32,
+	packNumObjects :: Word32
 }
 
 ------------------------------------------------------------
@@ -20,7 +20,8 @@ data Pack = Pack {
 
 packDeSerialize = do
 	ver <- getWord32be 
-	return (Pack ver)
+	n <- getWord32be
+	return (Pack ver n)
 
 packParse bs = runGet packDeSerialize bs'
 	where bs' = L.drop 4 bs
@@ -29,8 +30,8 @@ packParse bs = runGet packDeSerialize bs'
 -- packPretty
 --
 
-packPretty (Pack ver) =
+packPretty (Pack ver n) =
 	C.unlines [
-		C.concat [(C.pack "Version:     "), C.pack (show ver)]
-	--	C.concat [(C.pack "Num Objects: "), (show n)],
+		C.concat [(C.pack "Version:     "), C.pack (show ver)],
+		C.concat [(C.pack "Num Objects: "), C.pack (show n)]
 	]
