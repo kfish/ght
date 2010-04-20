@@ -1,7 +1,9 @@
 Name:                ght
-Version:             0.1.0
+Version:             0.2.0
 License:             GPL
+License-file:        GPL-2
 Author:              Conrad Parker <conrad@metadecks.org>
+Maintainer:          Conrad Parker <conrad@metadecks.org>
 Category:            Development
 Synopsis:            Trivial routines for inspecting git repositories
 Description:         This is a bunch of trivial routines for inspecting git
@@ -12,7 +14,7 @@ Cabal-Version:       >= 1.2
 
 ------------------------------------------------------------
 library
-    Build-Depends: base, data-default, bytestring, binary, SHA, old-locale, time
+    Build-Depends: base < 5, data-default, bytestring, binary, SHA, old-locale, time
     Exposed-Modules: Git.Commit
                      Git.Pack
 
