@@ -1,5 +1,5 @@
 Name:                ght
-Version:             0.2.0
+Version:             0.3.0
 License:             GPL
 License-file:        GPL-2
 Author:              Conrad Parker <conrad@metadecks.org>
@@ -10,7 +10,7 @@ Description:         This is a bunch of trivial routines for inspecting git
                      repositories. It is in no way useful beyond that.
 Stability:           experimental
 Build-Type:          Simple
-Cabal-Version:       >= 1.2
+Cabal-Version:       >= 1.6
 
 ------------------------------------------------------------
 library
@@ -25,4 +25,4 @@ library
 Executable ght
     Main-Is:         ght.hs
     Hs-Source-Dirs:  ., tools
-    Build-Depends:   base, data-default, transformers, ui-command, unix, directory, filepath, bytestring, zlib, SHA
+    Build-Depends:   base, data-default, transformers == 0.2.*, ui-command, unix, directory, filepath, bytestring, zlib, SHA

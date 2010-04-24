@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Monad (liftM, when)
-import Control.Monad.Trans (liftIO)
+import Control.Monad.IO.Class (liftIO)
 
 import Data.Default
 import Data.List (intersperse, sort)
