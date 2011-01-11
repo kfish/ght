@@ -14,7 +14,13 @@ Cabal-Version:       >= 1.6
 
 ------------------------------------------------------------
 library
-    Build-Depends: base < 5, data-default, bytestring, binary, SHA, old-locale, time
+    Build-Depends:   base < 5,
+                     data-default,
+                     bytestring,
+                     binary,
+                     SHA,
+                     old-locale,
+                     time
     Exposed-Modules: Git.Commit
                      Git.Pack
 
@@ -25,4 +31,13 @@ library
 Executable ght
     Main-Is:         ght.hs
     Hs-Source-Dirs:  ., tools
-    Build-Depends:   base, data-default, transformers == 0.2.*, ui-command, unix, directory, filepath, bytestring, zlib, SHA
+    Build-Depends:   base < 5,
+                     bytestring,
+                     data-default,
+                     directory,
+                     filepath,
+                     mtl >= 2.0.0.0 && < 3,
+                     SHA,
+                     ui-command,
+                     unix,
+                     zlib
