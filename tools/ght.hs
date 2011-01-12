@@ -102,10 +102,10 @@ dirIsRoot path = do
 --
 
 -- NOTE: this is a modified version of normalise from filepath,
--- fixed to handle the case of a trailing dot. I sent a patch
--- with this change to ndm on 20100211; once that is upstream,
--- then this copy can be removed and the System.FilePath version
--- used instead.
+-- fixed to handle the case of a trailing dot. This version was
+-- submitted via the libraries process as ticket #3975:
+-- http://hackage.haskell.org/trac/ghc/ticket/3975
+-- which was applied on 08 Jan 2011.
 
 -- | Normalise a file
 --
@@ -126,12 +126,17 @@ dirIsRoot path = do
 -- > Windows: normalise "c:/file" == "C:\\file"
 -- >          normalise "." == "."
 -- > Posix:   normalise "./" == "./"
-
+-- > Posix:   normalise "./." == "./"
+-- > Posix:   normalise "bob/fred/." == "bob/fred/"
 normalise :: FilePath -> FilePath
 normalise path = joinDrive (normaliseDrive drv) (f pth)
-              ++ [pathSeparator | not (null pth) && isPathSeparator (last pth)]
+              ++ [pathSeparator | isDirPath pth]
     where
         (drv,pth) = splitDrive path
+
+        isDirPath xs = lastSep xs
+            || not (null xs) && last xs == '.' && lastSep (init xs)
+        lastSep xs = not (null xs) && isPathSeparator (last xs)
 
         f = joinPath . dropDots [] . splitDirectories . propSep
 
@@ -142,8 +147,8 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
         propSep (x:xs) = x : propSep xs
         propSep [] = []
 
-        dropDots acc ["."] = ["."]
-	dropDots acc xs = dropDots' acc xs
+        dropDots acc xs | all (==".") xs = ["."]
+        dropDots acc xs = dropDots' acc xs
 
         dropDots' acc (".":xs) = dropDots' acc xs
         dropDots' acc (x:xs) = dropDots' (x:acc) xs
