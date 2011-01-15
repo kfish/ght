@@ -36,12 +36,12 @@ ghtShowPrefix = defCmd {
                 cmdShortDesc = "Show path from top-level directory of repo"
         }
 
-ghtShowPrefixHandler = do
-	path <- liftIO findRoot
-	cwd <- liftIO $ getCurrentDirectory
-	canPath <- liftIO $ canonicalizePath path
+ghtShowPrefixHandler = liftIO $ do
+	path <- findRoot
+	cwd <- getCurrentDirectory
+	canPath <- canonicalizePath path
 	let relPath = makeRelative canPath cwd
-	liftIO $ putStrLn (relPath ++ [pathSeparator])
+	putStrLn (relPath ++ [pathSeparator])
 
 ------------------------------------------------------------
 -- show-root
@@ -56,9 +56,9 @@ ghtShowRoot = defCmd {
                 cmdShortDesc = "Show path to top-level directory of repo"
         }
 
-ghtShowRootHandler = do
-	path <- liftIO findRoot
-	liftIO $ putStrLn path
+ghtShowRootHandler = liftIO $ do
+	path <- findRoot
+	putStrLn path
 
 ------------------------------------------------------------
 -- findRoot
@@ -93,9 +93,9 @@ findRoot' path = do
 						else findRoot' newPath
 		False -> return Nothing
 	
-dirIsRoot path = do
+dirIsRoot path = liftIO $ do
 	let dotGit = path </> ".git"
-	liftIO $ fileExist dotGit
+	fileExist dotGit
 	
 ------------------------------------------------------------
 -- normalise
