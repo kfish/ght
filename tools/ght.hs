@@ -238,18 +238,6 @@ prettyBlob blob bs
 	where
 		commitHeader = C.pack "commit "
 
-gitDeref f = do
-	path <- gitPath f
-	bs <- L.readFile path
-	deref bs
-    where
-        deref bs
-	    | refHeader `L.isPrefixOf` bs = gitDeref refPath
-            | otherwise = return (chomp bs)
-            where
-		refHeader = C.pack "ref: "
-		refPath = C.unpack (chomp $ L.drop 5 bs)
-
 chomp = C.takeWhile (/= '\n')
 
 ------------------------------------------------------------

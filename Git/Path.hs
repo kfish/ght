@@ -1,9 +1,12 @@
 module Git.Path (
     gitPath
   , gitRoot
+  , gitDeref
 ) where
 
 import Control.Monad.Trans (liftIO)
+import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Lazy.Char8 as C
 
 -- show-prefix, show-root use these
 import System.FilePath hiding (normalise)
@@ -47,6 +50,22 @@ dirIsRoot path = liftIO $ do
 	let dotGit = path </> ".git"
 	fileExist dotGit
 	
+------------------------------------------------------------
+-- deref
+--
+gitDeref f = do
+	path <- gitPath f
+	bs <- L.readFile path
+	deref bs
+    where
+        deref bs
+	    | refHeader `L.isPrefixOf` bs = gitDeref refPath
+            | otherwise = return (chomp bs)
+            where
+		refHeader = C.pack "ref: "
+		refPath = C.unpack (chomp $ L.drop 5 bs)
+                chomp = C.takeWhile (/= '\n')
+
 ------------------------------------------------------------
 -- normalise
 --
