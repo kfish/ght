@@ -38,7 +38,7 @@ ghtShowPrefix = defCmd {
         }
 
 ghtShowPrefixHandler = liftIO $ do
-	canPath <- canonicalizePath =<< findRoot
+	canPath <- canonicalizePath =<< gitRoot
 	cwd <- getCurrentDirectory
 	let relPath = makeRelative canPath cwd
 	putStrLn (relPath ++ [pathSeparator])
@@ -56,7 +56,7 @@ ghtShowRoot = defCmd {
                 cmdShortDesc = "Show path to top-level directory of repo"
         }
 
-ghtShowRootHandler = liftIO $ putStrLn =<< findRoot
+ghtShowRootHandler = liftIO $ putStrLn =<< gitRoot
 
 ------------------------------------------------------------
 -- branch

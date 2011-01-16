@@ -1,6 +1,6 @@
 module Git.Path (
     gitPath
-  , findRoot
+  , gitRoot
 ) where
 
 import Control.Monad.Trans (liftIO)
@@ -11,23 +11,23 @@ import System.Directory
 import System.Posix.Files
 
 ------------------------------------------------------------
--- findRoot
+-- gitRoot
 --
 
 gitPath :: FilePath -> IO FilePath
 gitPath f = do
-	root <- findRoot
+	root <- gitRoot
 	return $ root </> ".git" </> f
 
-findRoot :: IO FilePath
-findRoot = do
-	mp <- liftIO $ findRoot' "."
+gitRoot :: IO FilePath
+gitRoot = do
+	mp <- liftIO $ gitRoot' "."
 	case mp of
 		Just path -> return (path ++ [pathSeparator])
 		Nothing -> error "fatal: Not a git repository (or any of the parent directories)"
 
-findRoot' :: FilePath -> IO (Maybe FilePath)
-findRoot' path = do
+gitRoot' :: FilePath -> IO (Maybe FilePath)
+gitRoot' path = do
 	b <- fileExist path
 	case b of
 		True -> do
@@ -40,7 +40,7 @@ findRoot' path = do
 					canNewPath <- canonicalizePath newPath
 					if (canPath == canNewPath) then
 						return Nothing
-						else findRoot' newPath
+						else gitRoot' newPath
 		False -> return Nothing
 	
 dirIsRoot path = liftIO $ do
