@@ -84,8 +84,8 @@ showBranches _ = do
 
 showBranch hd b = do
 	ref <- derefFile $ "refs" </> "heads" </> b
-	if (ref == hd) then
-		putStr "* "
+	if (ref == hd)
+		then putStr "* "
 		else putStr "  "
 	putStrLn b
 

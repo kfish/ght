@@ -38,8 +38,8 @@ gitRoot' path = do
 					let newPath = ".." </> path
 					canPath <- canonicalizePath path
 					canNewPath <- canonicalizePath newPath
-					if (canPath == canNewPath) then
-						return Nothing
+					if (canPath == canNewPath)
+						then return Nothing
 						else gitRoot' newPath
 		False -> return Nothing
 	
