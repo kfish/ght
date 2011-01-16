@@ -79,11 +79,11 @@ showBranches _ = do
 	branches <- getDirectoryContents path
 	let branches' = filter (/= ".") branches
 	let branches'' = filter (/= "..") branches'
-	hd <- derefFile "HEAD"
+	hd <- gitDeref "HEAD"
 	mapM_ (showBranch hd) (sort branches'')
 
 showBranch hd b = do
-	ref <- derefFile $ "refs" </> "heads" </> b
+	ref <- gitDeref $ "refs" </> "heads" </> b
 	if (ref == hd)
 		then putStr "* "
 		else putStr "  "
@@ -104,7 +104,7 @@ findBlob (name:_) = do
                             ("refs" </> "remotes" </> name </> "HEAD")]
 	case mPath of
 		Just path -> do
-			bs <- derefFile path
+			bs <- gitDeref path
 			return [C.unpack bs]
 		Nothing -> return [name]
 
@@ -238,13 +238,13 @@ prettyBlob blob bs
 	where
 		commitHeader = C.pack "commit "
 
-derefFile f = do
+gitDeref f = do
 	path <- gitPath f
 	bs <- L.readFile path
 	deref bs
     where
         deref bs
-	    | refHeader `L.isPrefixOf` bs = derefFile refPath
+	    | refHeader `L.isPrefixOf` bs = gitDeref refPath
             | otherwise = return (chomp bs)
             where
 		refHeader = C.pack "ref: "
