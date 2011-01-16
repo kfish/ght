@@ -242,11 +242,11 @@ derefFile f = do
 	path <- gitPath f
 	bs <- L.readFile path
 	deref bs
-
-deref bs
-	| refHeader `L.isPrefixOf` bs = derefFile refPath
-        | otherwise = return (chomp bs)
-        where
+    where
+        deref bs
+	    | refHeader `L.isPrefixOf` bs = derefFile refPath
+            | otherwise = return (chomp bs)
+            where
 		refHeader = C.pack "ref: "
 		refPath = C.unpack (chomp $ L.drop 5 bs)
 
