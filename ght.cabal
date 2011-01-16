@@ -21,7 +21,8 @@ library
                      SHA,
                      old-locale,
                      time
-    Exposed-Modules: Git.Commit
+    Exposed-Modules: Git.Blob
+                     Git.Commit
                      Git.Pack
                      Git.Path
 
