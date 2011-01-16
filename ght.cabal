@@ -23,6 +23,7 @@ library
                      time
     Exposed-Modules: Git.Commit
                      Git.Pack
+                     Git.Path
 
 ------------------------------------------------------------
 -- ght tool
