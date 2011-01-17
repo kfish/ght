@@ -5,8 +5,11 @@ module Git.Blob (
 ) where
 
 import Codec.Compression.Zlib
+import Control.Applicative ((<$>))
+import Control.Monad
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as C
+import Data.Maybe (listToMaybe)
 
 -- show-prefix, show-root use these
 import System.FilePath
@@ -51,9 +54,4 @@ findBlob (name:_) = do
 		Nothing -> return [name]
 
 firstExist :: [FilePath] -> IO (Maybe FilePath)
-firstExist [] = return Nothing
-firstExist (f:fs) = do
-	p <- gitPath f
-	b <- fileExist p
-	if b then return (Just f) else firstExist fs
-
+firstExist fs = listToMaybe <$> (filterM fileExist <=< mapM gitPath) fs
