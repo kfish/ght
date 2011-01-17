@@ -24,8 +24,7 @@ import Git.Path
 readBlob blob = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
-	b <- L.readFile path
-	return (decompress b)
+        decompress <$> L.readFile path
 
 prettyBlob blob bs
 	| commitHeader `L.isPrefixOf` bs = C.concat [commitHeader, C.pack (blob ++ "\n"), commitPretty $ commitParse bs]
