@@ -4,6 +4,8 @@ module Git.Path (
   , gitDeref
 ) where
 
+import Control.Applicative ((<$>))
+import Control.Monad ((<=<))
 import Control.Monad.Trans (liftIO)
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as C
@@ -46,17 +48,12 @@ gitRoot' path = do
 						else gitRoot' newPath
 		False -> return Nothing
 	
-dirIsRoot path = liftIO $ do
-	let dotGit = path </> ".git"
-	fileExist dotGit
+dirIsRoot path = liftIO $ fileExist (path </> ".git")
 	
 ------------------------------------------------------------
 -- deref
 --
-gitDeref f = do
-	path <- gitPath f
-	bs <- L.readFile path
-	deref bs
+gitDeref = deref <=< L.readFile <=< gitPath
     where
         deref bs
 	    | refHeader `L.isPrefixOf` bs = gitDeref refPath
