@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Applicative ((<$>))
 import Control.Monad (liftM, when)
 import Control.Monad.Trans (liftIO)
 
@@ -70,9 +71,7 @@ ghtBranch = defCmd {
                 cmdExamples = [("Show branches available", "")]
         }
 
-ghtBranchHandler = do
-        args <- appArgs
-        liftIO $ showBranches args
+ghtBranchHandler = liftIO . showBranches =<< appArgs
 
 showBranches _ = do
 	path <- gitPath $ "refs" </> "heads"
@@ -101,10 +100,7 @@ ghtLog = defCmd {
                 cmdExamples = [("Show log of current branch", ""), ("Show log of branch feature1", "feature1")]
         }
 
-ghtLogHandler = do
-        args <- appArgs
-	b <- liftIO $ findBlob args
-	liftIO $ showLog b
+ghtLogHandler = liftIO . showLog =<< liftIO . findBlob =<< appArgs
 
 showLog (blob:_)
 	| blob == "" = return ()
@@ -140,8 +136,7 @@ ghtShowPack = defCmd {
         }
 
 ghtShowPackHandler = do
-        args <- appArgs
-	b <- liftIO $ findPack args
+	b <- liftIO . findPack =<< appArgs
 	-- liftIO $ L.hPut stdout b
 	let p = prettyPack b
 	liftIO $ L.hPut stdout p
@@ -174,9 +169,7 @@ ghtShowRawHandler = do
 	b <- liftIO $ findBlob args
 	liftIO $ showRawBlob b
 
-showRawBlob (blob:_) = do
-	d <- readBlob blob
-	L.hPut stdout d
+showRawBlob (blob:_) = L.hPut stdout =<< readBlob blob
 
 ------------------------------------------------------------
 -- show
@@ -195,10 +188,7 @@ ghtShowHandler = do
 	b <- liftIO $ findBlob args
 	liftIO $ showBlob b
 
-showBlob (blob:_) = do
-	d <- readBlob blob
-	let pb = prettyBlob blob d
-	L.hPut stdout pb
+showBlob (blob:_) = L.hPut stdout =<< prettyBlob blob <$> readBlob blob
 
 ------------------------------------------------------------
 -- hash-object
@@ -212,9 +202,7 @@ ghtHashObject = defCmd {
                 cmdExamples = [("Compute the object ID of file.c", "file.c")]
         }
 
-ghtHashObjectHandler = do
-        args <- appArgs
-	liftIO $ hashFile args
+ghtHashObjectHandler = liftIO . hashFile =<< appArgs
 
 hashFile [] = return ()
 
