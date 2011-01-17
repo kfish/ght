@@ -136,15 +136,11 @@ ghtShowPack = defCmd {
         }
 
 ghtShowPackHandler = do
-	b <- liftIO . findPack =<< appArgs
-	-- liftIO $ L.hPut stdout b
-	let p = prettyPack b
+        p <- prettyPack <$> (liftIO . findPack =<< appArgs)
 	liftIO $ L.hPut stdout p
 
-findPack (pack:_) = do
-	path <- gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
-	b <- L.readFile path
-	return b
+findPack (pack:_) =
+        L.readFile =<< gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
 
 prettyPack bs
 	| packHeader `L.isPrefixOf` bs = packPretty $ packParse bs
@@ -164,10 +160,7 @@ ghtShowRaw = defCmd {
                 cmdExamples = [("Show raw contents of blob deadbeef", "deadbeef"), ("Show raw contents of branch feature1", "feature1")]
         }
 
-ghtShowRawHandler = do
-        args <- appArgs
-	b <- liftIO $ findBlob args
-	liftIO $ showRawBlob b
+ghtShowRawHandler = liftIO . showRawBlob =<< liftIO . findBlob =<< appArgs
 
 showRawBlob (blob:_) = L.hPut stdout =<< readBlob blob
 
@@ -183,10 +176,7 @@ ghtShow = defCmd {
                 cmdExamples = [("Show contents of blob deadbeef", "deadbeef"), ("Show contents of branch feature1", "feature1")]
         }
 
-ghtShowHandler = do
-        args <- appArgs
-	b <- liftIO $ findBlob args
-	liftIO $ showBlob b
+ghtShowHandler = liftIO . showBlob =<< liftIO . findBlob =<< appArgs
 
 showBlob (blob:_) = L.hPut stdout =<< prettyBlob blob <$> readBlob blob
 
