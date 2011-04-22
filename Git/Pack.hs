@@ -17,6 +17,7 @@ import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.ByteString.Lazy as L
 import Data.Binary.Get
 import qualified Data.Iteratee as I
+import Data.Iteratee.Binary
 import Data.Word
 import System.FilePath
 
@@ -27,7 +28,7 @@ import Git.Path
 data Pack = Pack {
 	packVersion :: Word32,
 	packNumObjects :: Word32
-}
+} deriving (Show)
 
 ------------------------------------------------------------
 
@@ -50,13 +51,18 @@ packParse bs = runGet packDeSerialize bs'
 -- packReader (Iteratee)
 --
 
-packRead :: FilePath -> IO Bool
+packRead :: FilePath -> IO (Maybe Pack)
 packRead = I.fileDriverRandom packReader
 
-packReader :: I.Iteratee [Word8] IO Bool
+packReader :: I.Iteratee [Word8] IO (Maybe Pack)
 packReader = do
     n <- I.heads (toWord8s "PACK")
-    return (n == 4)
+    if (n == 4)
+        then do
+            ver <- endianRead4 MSB
+            n <- endianRead4 MSB
+            return $ Just (Pack ver n)
+        else return Nothing
     where
         toWord8s = map (toEnum . fromEnum)
 
