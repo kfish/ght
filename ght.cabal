@@ -20,7 +20,8 @@ library
                      binary,
                      SHA,
                      old-locale,
-                     time
+                     time,
+                     iteratee
     Exposed-Modules: Git.Blob
                      Git.Commit
                      Git.Pack

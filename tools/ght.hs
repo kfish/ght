@@ -25,6 +25,10 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as C
 import Data.Digest.Pure.SHA (sha1, showDigest)
 
+-- iteratee
+import qualified Data.Iteratee as I
+import Data.Word
+
 ------------------------------------------------------------
 -- show-prefix
 --
@@ -139,14 +143,42 @@ ghtShowPackHandler = do
         p <- prettyPack <$> (liftIO . findPack =<< appArgs)
 	liftIO $ L.hPut stdout p
 
-findPack (pack:_) =
-        L.readFile =<< gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
+findPack (pack:_) = L.readFile =<< packPath pack
 
 prettyPack bs
 	| packHeader `L.isPrefixOf` bs = packPretty $ packParse bs
         | otherwise = error "Not a pack"
 	where
 		packHeader = C.pack "PACK"
+
+-- | Generate the pathname for a given packfile
+packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
+
+------------------------------------------------------------
+-- it-pack
+--
+
+ghtItPack = defCmd {
+       	        cmdName = "it-pack",
+                cmdHandler = ghtItPackHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Do it on a pack",
+                cmdExamples = [("It pack pack-abcd.pack", "abcd")]
+        }
+
+ghtItPackHandler = do
+        pack <- (liftIO . fPack =<< appArgs)
+        x <- liftIO $ I.fileDriverRandom packReader pack
+	liftIO $ putStrLn (show x)
+
+fPack (pack:_) = packPath pack
+
+packReader :: I.Iteratee [Word8] IO Bool
+packReader = do
+    n <- I.heads (toWord8s "PACK")
+    return (n == 4)
+    where
+        toWord8s = map (toEnum . fromEnum)
 
 ------------------------------------------------------------
 -- show-raw
@@ -220,7 +252,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtItPack, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
