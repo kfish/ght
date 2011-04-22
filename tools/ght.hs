@@ -25,10 +25,6 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as C
 import Data.Digest.Pure.SHA (sha1, showDigest)
 
--- iteratee
-import qualified Data.Iteratee as I
-import Data.Word
-
 ------------------------------------------------------------
 -- show-prefix
 --
@@ -165,17 +161,10 @@ ghtItPack = defCmd {
 
 ghtItPackHandler = do
         pack <- (liftIO . fPack =<< appArgs)
-        x <- liftIO $ I.fileDriverRandom packReader pack
+        x <- liftIO $ packRead pack
 	liftIO $ putStrLn (show x)
 
 fPack (pack:_) = packPath pack
-
-packReader :: I.Iteratee [Word8] IO Bool
-packReader = do
-    n <- I.heads (toWord8s "PACK")
-    return (n == 4)
-    where
-        toWord8s = map (toEnum . fromEnum)
 
 ------------------------------------------------------------
 -- show-raw

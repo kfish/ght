@@ -1,8 +1,13 @@
 module Git.Pack (
         -- * Pack object
 	Pack(..),
-	packParse,
 	packPretty,
+
+        -- * ByteString / Binary
+	packParse,
+
+        -- * Iteratee
+        packRead,
 
         -- * Paths
         packPath
@@ -11,6 +16,7 @@ module Git.Pack (
 import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.ByteString.Lazy as L
 import Data.Binary.Get
+import qualified Data.Iteratee as I
 import Data.Word
 import System.FilePath
 
@@ -29,7 +35,7 @@ data Pack = Pack {
 packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
 
 ------------------------------------------------------------
--- packParse
+-- packParse (ByteString / Binary)
 --
 
 packDeSerialize = do
@@ -39,6 +45,20 @@ packDeSerialize = do
 
 packParse bs = runGet packDeSerialize bs'
 	where bs' = L.drop 4 bs
+
+------------------------------------------------------------
+-- packReader (Iteratee)
+--
+
+packRead :: FilePath -> IO Bool
+packRead = I.fileDriverRandom packReader
+
+packReader :: I.Iteratee [Word8] IO Bool
+packReader = do
+    n <- I.heads (toWord8s "PACK")
+    return (n == 4)
+    where
+        toWord8s = map (toEnum . fromEnum)
 
 ------------------------------------------------------------
 -- packPretty
