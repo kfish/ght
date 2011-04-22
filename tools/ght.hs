@@ -151,9 +151,6 @@ prettyPack bs
 	where
 		packHeader = C.pack "PACK"
 
--- | Generate the pathname for a given packfile
-packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
-
 ------------------------------------------------------------
 -- it-pack
 --
