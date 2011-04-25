@@ -1,3 +1,5 @@
+{-# OPTIONS -Wall #-}
+
 module Git.Blob (
     readBlob
   , prettyBlob
@@ -13,7 +15,6 @@ import Data.Maybe (listToMaybe)
 
 -- show-prefix, show-root use these
 import System.FilePath
-import System.Directory
 import System.Posix.Files
 
 import Git.Commit
@@ -21,11 +22,13 @@ import Git.Path
 
 ------------------------------------------------------------
 
+readBlob :: String -> IO C.ByteString
 readBlob blob = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
         decompress <$> L.readFile path
 
+prettyBlob :: String -> C.ByteString -> C.ByteString
 prettyBlob blob bs
 	| commitHeader `L.isPrefixOf` bs = C.concat [commitHeader, C.pack (blob ++ "\n"), commitPretty $ commitParse bs]
         | otherwise = chomp bs
@@ -37,8 +40,8 @@ prettyBlob blob bs
 -- findBlob
 --
 
-findBlob [] = findBlob ["HEAD"]
-
+findBlob :: [String] -> IO [String]
+findBlob []       = findBlob ["HEAD"]
 findBlob (name:_) = do
 	mPath <- firstExist [name,
                             ("refs" </> name),

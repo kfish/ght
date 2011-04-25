@@ -1,10 +1,11 @@
+{-# OPTIONS -Wall #-}
+
 module Git.Path (
     gitPath
   , gitRoot
   , gitDeref
 ) where
 
-import Control.Applicative ((<$>))
 import Control.Monad ((<=<))
 import Control.Monad.Trans (liftIO)
 import qualified Data.ByteString.Lazy as L
@@ -47,12 +48,14 @@ gitRoot' path = do
 						then return Nothing
 						else gitRoot' newPath
 		False -> return Nothing
-	
-dirIsRoot path = liftIO $ fileExist (path </> ".git")
+    where
+        dirIsRoot p = liftIO $ fileExist (p </> ".git")
 	
 ------------------------------------------------------------
 -- deref
 --
+
+gitDeref :: String ->  IO C.ByteString
 gitDeref = deref <=< L.readFile <=< gitPath
     where
         deref bs
@@ -113,7 +116,7 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
         propSep (x:xs) = x : propSep xs
         propSep [] = []
 
-        dropDots acc xs | all (==".") xs = ["."]
+        dropDots _   xs | all (==".") xs = ["."]
         dropDots acc xs = dropDots' acc xs
 
         dropDots' acc (".":xs) = dropDots' acc xs
@@ -121,5 +124,6 @@ normalise path = joinDrive (normaliseDrive drv) (f pth)
         dropDots' acc [] = reverse acc
 
 --joinDrive = ++
+normaliseDrive :: FilePath -> FilePath
 normaliseDrive = id
 

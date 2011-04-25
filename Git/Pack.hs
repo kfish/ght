@@ -1,10 +1,14 @@
+{-# OPTIONS -Wall #-}
+
 module Git.Pack (
-        -- * Pack object
+        -- * Types
 	Pack(..),
-	packPretty,
+        PackObject(..),
+        PackObjectType,
 
         -- * ByteString / Binary
 	packParse,
+	packPretty,
 
         -- * Iteratee
         packRead,
@@ -51,17 +55,20 @@ data PackObject = PackObject
 ------------------------------------------------------------
 
 -- | Generate the pathname for a given packfile
+packPath :: String -> IO FilePath
 packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
 
 ------------------------------------------------------------
 -- packParse (ByteString / Binary)
 --
 
+packDeSerialize :: Get Pack
 packDeSerialize = do
 	ver <- getWord32be 
 	n <- getWord32be
 	return (Pack ver n [])
 
+packParse :: L.ByteString -> Pack
 packParse bs = runGet packDeSerialize bs'
 	where bs' = L.drop 4 bs
 
@@ -78,9 +85,9 @@ packReader = do
     if (n == 4)
         then do
             ver <- endianRead4 MSB
-            n <- endianRead4 MSB
+            num <- endianRead4 MSB
             o <- maybeToList <$> packObjectRead
-            return $ Just (Pack ver n o)
+            return $ Just (Pack ver num o)
         else return Nothing
     where
         toWord8s = map (toEnum . fromEnum)
@@ -128,6 +135,7 @@ packObjectRead = do
 -- packPretty
 --
 
+packPretty :: Pack -> L.ByteString
 packPretty (Pack ver n _) =
 	C.unlines [
 		C.concat [(C.pack "Version:     "), C.pack (show ver)],

@@ -1,3 +1,5 @@
+{-# OPTIONS -Wall #-}
+
 module Git.Commit (
 	Commit(..),
 	commitParse,
@@ -5,16 +7,12 @@ module Git.Commit (
 ) where
 
 import qualified Data.ByteString.Lazy.Char8 as C
-import Data.Digest.Pure.SHA (Digest, sha1, showDigest)
 
-import Data.Time.Clock
 import Data.Time.Format
 import Data.Time.LocalTime
 import System.Locale
 
-type Author = String
-
-type Date = String
+------------------------------------------------------------
 
 data Commit = Commit {
 	commitParent :: C.ByteString, --Digest,
@@ -29,21 +27,25 @@ data Commit = Commit {
 -- commitParse
 --
 
-e = C.empty
-
+defCommit :: Commit
 defCommit = Commit e e e e e e
+    where
+        e = C.empty
 
+commitParse :: C.ByteString -> Commit
 commitParse bs = commitParseLines defCommit (C.lines bs)
 
+commitParseLines :: Commit -> [C.ByteString] -> Commit
 commitParseLines c [] = c
-
 commitParseLines c (l:ls)
 	| C.null l = c{commitMessage = C.unlines ls}
 	| otherwise = commitParseLines (commitModLine c l) ls
 
+commitModLine :: Commit -> C.ByteString -> Commit
 commitModLine c l = commitMod c (C.unpack hd) bdy
 	where (hd:bdy) = C.words l
 
+commitMod :: Commit -> [Char] -> [C.ByteString] -> Commit
 commitMod c hd bdy
 	| hd == "commit" = c
 	| hd == "parent" = c{commitParent = head bdy}
@@ -59,7 +61,8 @@ commitMod c hd bdy
 -- commitPretty
 --
 
-commitPretty (Commit p a ad c cd m) =
+commitPretty :: Commit -> C.ByteString
+commitPretty (Commit _p a ad _c _cd m) =
 	C.unlines [
 		C.concat [(C.pack "Author: "), a],
 		C.concat [(C.pack "Date:   "), f],
