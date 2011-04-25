@@ -136,30 +136,6 @@ ghtShowPack = defCmd {
         }
 
 ghtShowPackHandler = do
-        p <- prettyPack <$> (liftIO . findPack =<< appArgs)
-	liftIO $ L.hPut stdout p
-
-findPack (pack:_) = L.readFile =<< packPath pack
-
-prettyPack bs
-	| packHeader `L.isPrefixOf` bs = packPretty $ packParse bs
-        | otherwise = error "Not a pack"
-	where
-		packHeader = C.pack "PACK"
-
-------------------------------------------------------------
--- it-pack
---
-
-ghtItPack = defCmd {
-       	        cmdName = "it-pack",
-                cmdHandler = ghtItPackHandler,
-                cmdCategory = "Blob management",
-                cmdShortDesc = "Do it on a pack",
-                cmdExamples = [("It pack pack-abcd.pack", "abcd")]
-        }
-
-ghtItPackHandler = do
         pack <- (liftIO . fPack =<< appArgs)
         x <- liftIO $ packRead pack
 	liftIO $ putStrLn (show x)
@@ -238,7 +214,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtItPack, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."

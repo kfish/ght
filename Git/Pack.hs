@@ -6,8 +6,6 @@ module Git.Pack (
         PackObject(..),
         PackObjectType,
 
-        -- * ByteString / Binary
-	packParse,
 	packPretty,
 
         -- * Iteratee
@@ -21,7 +19,6 @@ import Control.Applicative
 import Data.Bits
 import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.ByteString.Lazy as L
-import Data.Binary.Get
 import qualified Data.Iteratee as I
 import Data.Iteratee.Binary
 import Data.Maybe (maybeToList)
@@ -57,20 +54,6 @@ data PackObject = PackObject
 -- | Generate the pathname for a given packfile
 packPath :: String -> IO FilePath
 packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
-
-------------------------------------------------------------
--- packParse (ByteString / Binary)
---
-
-packDeSerialize :: Get Pack
-packDeSerialize = do
-	ver <- getWord32be 
-	n <- getWord32be
-	return (Pack ver n [])
-
-packParse :: L.ByteString -> Pack
-packParse bs = runGet packDeSerialize bs'
-	where bs' = L.drop 4 bs
 
 ------------------------------------------------------------
 -- packReader (Iteratee)
