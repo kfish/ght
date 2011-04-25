@@ -45,6 +45,7 @@ data PackObjectType = OBJ_COMMIT
 data PackObject = PackObject
     { poType :: PackObjectType
     , poSize :: Int
+    , poBase :: Maybe [Word8]
     } deriving (Show)
 
 ------------------------------------------------------------
@@ -92,7 +93,8 @@ packObjectRead = do
     sz' <- if doNext x
                then readSize 4 sz
                else return sz
-    return $ PackObject <$> t <*> pure sz'
+    base <- readBase t
+    return $ PackObject <$> t <*> pure sz' <*> pure base
     where
         parseOBJ :: Word8 -> Maybe PackObjectType
         parseOBJ 1 = Just OBJ_COMMIT
@@ -113,6 +115,11 @@ packObjectRead = do
             if doNext x
                 then readSize (shft+7) sz
                 else return sz
+
+        readBase :: Maybe PackObjectType -> I.Iteratee [Word8] IO (Maybe [Word8])
+        readBase (Just OBJ_OFS_DELTA) = Just <$> (sequence $ replicate 20 I.head)
+        readBase (Just OBJ_REF_DELTA) = Just <$> (sequence $ replicate 20 I.head)
+        readBase _                    = return Nothing
 
         castEnum = toEnum . fromEnum
 
