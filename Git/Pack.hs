@@ -33,8 +33,8 @@ import Git.Path
 ------------------------------------------------------------
 
 data Pack = Pack
-    { packVersion :: Word32
-    , packNumObjects :: Word32
+    { packVersion :: Int
+    , packNumObjects :: Int
     , packObjects :: [PackObject]
     } deriving (Show)
 
@@ -71,8 +71,8 @@ packReader = do
     n <- I.heads "PACK"
     if (n == 4)
         then do
-            ver <- endianRead4 MSB
-            num <- endianRead4 MSB
+            ver <- fromIntegral <$> endianRead4 MSB
+            num <- fromIntegral <$> endianRead4 MSB
             o <- maybeToList <$> packObjectRead
             return $ Just (Pack ver num o)
         else return Nothing
