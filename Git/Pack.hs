@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS -Wall #-}
 
 module Git.Pack (
@@ -17,6 +18,7 @@ module Git.Pack (
 
 import Control.Applicative
 import Data.Bits
+import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.ByteString.Lazy as L
 import qualified Data.Iteratee as I
@@ -62,9 +64,9 @@ packPath pack = gitPath ("objects" </> "pack" </> ("pack-" ++ pack ++ ".pack"))
 packRead :: FilePath -> IO (Maybe Pack)
 packRead = I.fileDriverRandom packReader
 
-packReader :: I.Iteratee [Word8] IO (Maybe Pack)
+packReader :: I.Iteratee ByteString IO (Maybe Pack)
 packReader = do
-    n <- I.heads (toWord8s "PACK")
+    n <- I.heads "PACK"
     if (n == 4)
         then do
             ver <- endianRead4 MSB
@@ -72,10 +74,8 @@ packReader = do
             o <- maybeToList <$> packObjectRead
             return $ Just (Pack ver num o)
         else return Nothing
-    where
-        toWord8s = map (toEnum . fromEnum)
 
-packObjectRead :: I.Iteratee [Word8] IO (Maybe PackObject)
+packObjectRead :: I.Iteratee ByteString IO (Maybe PackObject)
 packObjectRead = do
     x <- I.head
     let t = parseOBJ $ (x .&. 0x70) `shiftR` 4
@@ -98,7 +98,7 @@ packObjectRead = do
         doNext :: Word8 -> Bool
         doNext x = (x .&. 0x80) /= 0
 
-        readSize :: Int -> Int -> I.Iteratee [Word8] IO Int
+        readSize :: Int -> Int -> I.Iteratee ByteString IO Int
         readSize shft acc = do
             x <- I.head
             let sz = acc + (((castEnum (x .&. 0x7f)) :: Int) `shiftL` shft)
@@ -106,7 +106,7 @@ packObjectRead = do
                 then readSize (shft+7) sz
                 else return sz
 
-        readBase :: Maybe PackObjectType -> I.Iteratee [Word8] IO (Maybe [Word8])
+        readBase :: Maybe PackObjectType -> I.Iteratee ByteString IO (Maybe [Word8])
         readBase (Just OBJ_OFS_DELTA) = Just <$> (sequence $ replicate 20 I.head)
         readBase (Just OBJ_REF_DELTA) = Just <$> (sequence $ replicate 20 I.head)
         readBase _                    = return Nothing
