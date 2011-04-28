@@ -23,6 +23,7 @@ import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.ByteString.Lazy as L
 import qualified Data.Iteratee as I
 import Data.Iteratee.Binary
+import Data.Iteratee.ZLib
 import Data.Maybe (maybeToList)
 import Data.Word
 import System.FilePath
@@ -49,6 +50,7 @@ data PackObject = PackObject
     { poType :: PackObjectType
     , poSize :: Int
     , poBase :: Maybe [Word8]
+    , poData :: ByteString
     } deriving (Show)
 
 ------------------------------------------------------------
@@ -84,7 +86,8 @@ packObjectRead = do
                then readSize 4 sz
                else return sz
     base <- readBase t
-    return $ PackObject <$> t <*> pure sz' <*> pure base
+    d <- I.joinIM $ enumInflate Zlib defaultDecompressParams I.stream2stream
+    return $ PackObject <$> t <*> pure sz' <*> pure base <*> pure d
     where
         parseOBJ :: Word8 -> Maybe PackObjectType
         parseOBJ 1 = Just OBJ_COMMIT
