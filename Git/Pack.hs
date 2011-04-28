@@ -24,7 +24,7 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.Iteratee as I
 import Data.Iteratee.Binary
 import Data.Iteratee.ZLib
-import Data.Maybe (maybeToList)
+import Data.Maybe (catMaybes)
 import Data.Word
 import System.FilePath
 
@@ -73,8 +73,8 @@ packReader = do
         then do
             ver <- fromIntegral <$> endianRead4 MSB
             num <- fromIntegral <$> endianRead4 MSB
-            o <- maybeToList <$> packObjectRead
-            return $ Just (Pack ver num o)
+            os <- catMaybes <$> sequence (replicate num packObjectRead)
+            return $ Just (Pack ver num os)
         else return Nothing
 
 packObjectRead :: I.Iteratee ByteString IO (Maybe PackObject)
