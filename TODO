@@ -35,6 +35,9 @@ pack, version 2, 5957 objects
 
 http://book.git-scm.com/7_the_packfile.html
 
+OBJ_OFS_DELTA encoding:
+http://www.gelato.unsw.edu.au/archives/git/0609/27763.html
+
 Haskell cruft
 =============
 
