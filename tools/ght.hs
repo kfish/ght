@@ -141,8 +141,8 @@ ghtShowPackHandler = do
 	liftIO $ putStrLn (show x)
 
 fPack (pack:_)
-    | '/' `elem` pack = return pack
-    | otherwise       = packPath pack
+    | any isPathSeparator pack = return pack
+    | otherwise                = packPath pack
 
 ------------------------------------------------------------
 -- show-raw
