@@ -140,9 +140,11 @@ ghtShowPackHandler = do
         x <- liftIO $ packRead pack
 	liftIO $ putStrLn (show x)
 
-fPack (pack:_)
-    | any isPathSeparator pack = return pack
-    | otherwise                = packPath pack
+fPack (pack:_) = do
+    exists <- doesFileExist pack
+    if exists
+        then return pack
+        else packPath pack
 
 ------------------------------------------------------------
 -- show-raw
