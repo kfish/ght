@@ -140,7 +140,9 @@ ghtShowPackHandler = do
         x <- liftIO $ packRead pack
 	liftIO $ putStrLn (show x)
 
-fPack (pack:_) = packPath pack
+fPack (pack:_)
+    | '/' `elem` pack = return pack
+    | otherwise       = packPath pack
 
 ------------------------------------------------------------
 -- show-raw
