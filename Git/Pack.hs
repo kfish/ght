@@ -42,14 +42,13 @@ data PackObjectType = OBJ_COMMIT
                     | OBJ_TREE
                     | OBJ_BLOB
                     | OBJ_TAG
-                    | OBJ_OFS_DELTA
-                    | OBJ_REF_DELTA
+                    | OBJ_OFS_DELTA Int
+                    | OBJ_REF_DELTA [Word8]
                     deriving (Show, Eq)
 
 data PackObject = PackObject
     { poType :: PackObjectType
     , poSize :: Int
-    , poBase :: Maybe [Word8]
     , poData :: ByteString
     } deriving (Show)
 
@@ -85,17 +84,17 @@ packObjectRead = do
     sz' <- if doNext x
                then readSize 4 sz
                else return sz
-    base <- readBase t
+    t' <- readBase t
     d <- I.joinIM $ enumInflate Zlib defaultDecompressParams I.stream2stream
-    return $ PackObject <$> t <*> pure sz' <*> pure base <*> pure d
+    return $ PackObject <$> t' <*> pure sz' <*> pure d
     where
         parseOBJ :: Word8 -> Maybe PackObjectType
         parseOBJ 1 = Just OBJ_COMMIT
         parseOBJ 2 = Just OBJ_TREE
         parseOBJ 3 = Just OBJ_BLOB
         parseOBJ 4 = Just OBJ_TAG
-        parseOBJ 6 = Just OBJ_OFS_DELTA
-        parseOBJ 7 = Just OBJ_REF_DELTA
+        parseOBJ 6 = Just (OBJ_OFS_DELTA 0)
+        parseOBJ 7 = Just (OBJ_REF_DELTA [])
         parseOBJ _   = Nothing
 
         doNext :: Word8 -> Bool
@@ -109,10 +108,19 @@ packObjectRead = do
                 then readSize (shft+7) sz
                 else return sz
 
-        readBase :: Maybe PackObjectType -> I.Iteratee ByteString IO (Maybe [Word8])
-        readBase (Just OBJ_OFS_DELTA) = Just <$> (sequence $ replicate 20 I.head)
-        readBase (Just OBJ_REF_DELTA) = Just <$> (sequence $ replicate 20 I.head)
-        readBase _                    = return Nothing
+        readBase :: Maybe PackObjectType -> I.Iteratee ByteString IO (Maybe PackObjectType)
+        readBase (Just (OBJ_OFS_DELTA 0))  = Just . OBJ_OFS_DELTA <$> readOFSBase 0 0
+        readBase (Just (OBJ_REF_DELTA [])) = Just . OBJ_REF_DELTA <$> (sequence $ replicate 20 I.head)
+        readBase (Just t)                  = return (Just t)
+        readBase Nothing                   = return Nothing
+
+        readOFSBase :: Int -> Int -> I.Iteratee ByteString IO Int
+        readOFSBase shft acc = do
+            x <- I.head
+            let bs = acc + (((castEnum (x .&. 0x7f)) :: Int) `shiftL` shft)
+            if doNext x
+                then readOFSBase (shft+7) (bs+1)
+                else return bs
 
         castEnum = toEnum . fromEnum
 
