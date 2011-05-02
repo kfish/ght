@@ -24,14 +24,6 @@ Handle A^n^m
 
 Pack files
 ----------
-Interpret .git/objects/pack/*.pack files:
-
-0000000: 5041 434b 0000 0002 0000 1745 9915 789c  PACK.......E..x.
-
-objects/pack/pack-03dd807efaffb1084f2a314ee633591a21f9166e.pack: Git
-pack, version 2, 5957 objects
-
-(0x1745 = 5957)
 
 http://book.git-scm.com/7_the_packfile.html
 
