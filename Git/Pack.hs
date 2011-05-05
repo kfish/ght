@@ -108,9 +108,12 @@ packObjectRead = do
                 then readSize (shft+7) sz
                 else return sz
 
-        readBase :: Maybe PackObjectType -> I.Iteratee ByteString IO (Maybe PackObjectType)
-        readBase (Just (OBJ_OFS_DELTA 0))  = Just . OBJ_OFS_DELTA <$> readOFSBase 0 0
-        readBase (Just (OBJ_REF_DELTA [])) = Just . OBJ_REF_DELTA <$> (sequence $ replicate 20 I.head)
+        readBase :: Maybe PackObjectType
+                 -> I.Iteratee ByteString IO (Maybe PackObjectType)
+        readBase (Just (OBJ_OFS_DELTA 0))  =
+            Just . OBJ_OFS_DELTA <$> readOFSBase 0 0
+        readBase (Just (OBJ_REF_DELTA [])) =
+            Just . OBJ_REF_DELTA <$> (sequence $ replicate 20 I.head)
         readBase (Just t)                  = return (Just t)
         readBase Nothing                   = return Nothing
 
