@@ -56,4 +56,4 @@ findBlob (name:_) = do
 		Nothing -> return [name]
 
 firstExist :: [FilePath] -> IO (Maybe FilePath)
-firstExist fs = listToMaybe <$> (filterM fileExist <=< mapM gitPath) fs
+firstExist fs = listToMaybe <$> (filterM (fileExist <=< gitPath)) fs
