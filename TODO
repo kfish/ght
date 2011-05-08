@@ -2,6 +2,20 @@
 Git wrangling
 =============
 
+Pack files
+----------
+
+  * track file offsets of pack objects
+
+  * parse .idx
+
+  * verify idx offsets vs. pack parse
+
+  * implement abstract object lookup via idx & pack reader, lazily
+with error fallback on corrupt idx
+
+Goal: robust ght show
+
 Config
 ------
 parse .git/config
@@ -22,28 +36,18 @@ Handle A~n
 Handle A^^n
 Handle A^n^m
 
-Pack files
-----------
+
+Haskell cruft
+=============
+
+Use a left-fold enumerator for following branch histories
+
+
+Reference
+=========
 
 http://book.git-scm.com/7_the_packfile.html
 
 OBJ_OFS_DELTA encoding:
 http://www.gelato.unsw.edu.au/archives/git/0609/27763.html
 
-  * track file offsets of pack objects
-
-  * parse .idx
-
-  * verify idx offsets vs. pack parse
-
-  * implement abstract object lookup via idx & pack reader, lazily
-with error fallback on corrupt idx
-
-Goal: robust ght show
-
-Haskell cruft
-=============
-
-Use Data.Binary for reading
-
-Use a left-fold enumerator for following branch histories
