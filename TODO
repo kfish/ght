@@ -16,6 +16,12 @@ with error fallback on corrupt idx
 
 Goal: robust ght show
 
+Root
+----
+
+* Handle a working tree where .git is a plain ASCII file containing
+"gitdir: <path>", i.e. the path to the real git repository.
+
 Config
 ------
 parse .git/config
