@@ -7,8 +7,6 @@ Pack files
 
   * track file offsets of pack objects
 
-  * parse .idx
-
   * verify idx offsets vs. pack parse
 
   * implement abstract object lookup via idx & pack reader, lazily
