@@ -52,12 +52,12 @@ idxSha1   :: IDX -> Int -> IO BS.ByteString
 idxSha1 IDX1{..} n
     | n >= idx1Size = outOfRange
     | otherwise     = do
-        cs <- peekByteOff idx1Offsets (4 + (n * 24))
+        let cs = idx1Offsets `plusPtr` (4 + (n * 24))
         BS.packCStringLen (cs, 20)
 idxSha1 IDX2{..} n
     | n >= idx2Size = outOfRange
     | otherwise     = do
-        cs <- peekByteOff idx2SHA1s (n * 20)
+        let cs = idx2SHA1s `plusPtr` (n * 20)
         BS.packCStringLen (cs, 20)
 
 -- | Nth CRC
