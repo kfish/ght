@@ -22,10 +22,13 @@ library
                      old-locale,
                      time,
                      iteratee,
-                     iteratee-compress
+                     iteratee-compress,
+                     mmap,
+                     storable-endian
     Exposed-Modules: Git.Blob
                      Git.Commit
                      Git.Pack
+                     Git.PackIndex
                      Git.Path
 
 ------------------------------------------------------------

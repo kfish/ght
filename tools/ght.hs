@@ -12,6 +12,7 @@ import UI.Command
 import Git.Blob
 import Git.Commit
 import Git.Pack
+import Git.PackIndex
 import Git.Path
 
 -- show-prefix, show-root use these
@@ -147,6 +148,29 @@ fPack (pack:_) = do
         else packPath pack
 
 ------------------------------------------------------------
+-- show-idx
+--
+
+ghtShowIdx = defCmd {
+       	        cmdName = "show-idx",
+                cmdHandler = ghtShowIdxHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Show the raw dump of a pack index",
+                cmdExamples = [("Show raw contents of pack pack-abcd.idx", "abcd")]
+        }
+
+ghtShowIdxHandler = do
+        idx <- (liftIO . fIdx =<< appArgs)
+        x <- liftIO $ dumpRawPackIndex idx
+	liftIO $ putStrLn x
+
+fIdx (idx:_) = do
+    exists <- doesFileExist idx
+    if exists
+        then return idx
+        else idxPath idx
+
+------------------------------------------------------------
 -- show-raw
 --
 
@@ -218,7 +242,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtShowIdx, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
