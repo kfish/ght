@@ -3,7 +3,7 @@
 
 module Git.PackIndex (
         dumpRawPackIndex,
-        findInPackIndex,
+        findInPackIdxs,
 
         -- * Paths
         idxPath
@@ -17,6 +17,7 @@ import Data.Word (Word32)
 import Foreign.Ptr
 import Foreign.Storable
 import Data.Storable.Endian
+import System.Directory
 import System.FilePath
 import System.IO.MMap
 import System.Posix.Types
@@ -100,6 +101,15 @@ outOfRange = error "Index out of range"
 
 ------------------------------------------------------------
 
+idxFiles :: IO [FilePath]
+idxFiles = do
+    packDir <- gitPath ("objects" </> "pack")
+    map (packDir </>) . filter isIdx <$> getDirectoryContents packDir
+    where
+        isIdx = (== ".idx") . takeExtension
+
+------------------------------------------------------------
+
 idxFind :: IDX -> BS.ByteString -> IO (Maybe (IDX, Int))
 idxFind idx sha = idxFind' 0 (idxSize idx)
     where
@@ -118,8 +128,13 @@ idxFind idx sha = idxFind' 0 (idxSize idx)
             where
                 i = floor ((fromIntegral (lo + hi)) / 2.0)
 
-findInPackIndex :: FilePath -> BS.ByteString -> IO ()
-findInPackIndex fp sha = do
+findInPackIdxs :: BS.ByteString -> IO ()
+findInPackIdxs sha = do
+    idxs <- idxFiles
+    mapM_ (findInPackIndex' sha) idxs
+
+findInPackIndex' :: BS.ByteString -> FilePath -> IO ()
+findInPackIndex' sha fp = do
     idx <- readIdx fp
     m'i <- idxFind idx sha
     case m'i of

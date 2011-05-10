@@ -179,14 +179,13 @@ ghtFindIdx = defCmd {
        	        cmdName = "find-idx",
                 cmdHandler = ghtFindIdxHandler,
                 cmdCategory = "Blob management",
-                cmdShortDesc = "Find a SHA in a pack index",
-                cmdExamples = [("Find SHA1 333fff in pack-abcd.idx", "abcd 333fff")]
+                cmdShortDesc = "Find a SHA in any pack index",
+                cmdExamples = [("Find SHA1 333fff", "333fff")]
         }
 
 ghtFindIdxHandler = do
-        (fp:sha:_) <- appArgs
-        fp' <- liftIO $ fIdx [fp]
-        liftIO $ findInPackIndex fp' (readDigestBS sha)
+        (sha:_) <- appArgs
+        liftIO $ findInPackIdxs (readDigestBS sha)
 
 ------------------------------------------------------------
 -- show-raw
