@@ -11,6 +11,7 @@ module Git.Pack (
 
         -- * Iteratee
         packRead,
+        packReadObject,
 
         -- * Paths
         packPath
@@ -27,6 +28,7 @@ import Data.Iteratee.ZLib
 import Data.Maybe (catMaybes)
 import Data.Word
 import System.FilePath
+import System.Posix.Types
 
 import Git.Path
 
@@ -74,6 +76,20 @@ packReader = do
             num <- fromIntegral <$> endianRead4 MSB
             os <- catMaybes <$> sequence (replicate num packObjectRead)
             return $ Just (Pack ver num os)
+        else return Nothing
+
+packReadObject :: FilePath -> FileOffset -> IO (Maybe PackObject)
+packReadObject fp off = I.fileDriverRandom (packReadObject' off) fp
+
+packReadObject' :: FileOffset -> I.Iteratee ByteString IO (Maybe PackObject)
+packReadObject' off = do
+    n <- I.heads "PACK"
+    if (n == 4)
+        then do
+            _ver <- fromIntegral <$> endianRead4 MSB
+            _num <- fromIntegral <$> endianRead4 MSB
+            I.seek off
+            packObjectRead
         else return Nothing
 
 packObjectRead :: I.Iteratee ByteString IO (Maybe PackObject)
