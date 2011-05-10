@@ -30,6 +30,7 @@ library
                      Git.Pack
                      Git.PackIndex
                      Git.Path
+                     Git.SHA
 
 ------------------------------------------------------------
 -- ght tool
