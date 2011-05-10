@@ -28,11 +28,13 @@ import Git.Path
 ------------------------------------------------------------
 
 data IDX = IDX1 {
-      idx1Size       :: Int
+      idx1Pack       :: FilePath
+    , idx1Size       :: Int
     , idx1Fanout     :: Ptr (BigEndian Word32)
     , idx1Offsets    :: Ptr (BigEndian Word32)
     } | IDX2 {
-      idx2Size       :: Int
+      idx2Pack       :: FilePath
+    , idx2Size       :: Int
     , idx2Fanout     :: Ptr (BigEndian Word32)
     , idx2SHA1s      :: Ptr (BigEndian Word32)
     , idx2CRCs       :: Ptr (BigEndian Word32)
@@ -45,13 +47,18 @@ data IDX = IDX1 {
 ------------------------------------------------------------
 -- | Public API
 
+-- | Corresponding packfile path
+idxPack :: IDX -> FilePath
+idxPack IDX1{..} = idx1Pack
+idxPack IDX2{..} = idx2Pack
+
 -- | Number of objects in the corresponding .pack file
-idxSize   :: IDX -> Int
+idxSize :: IDX -> Int
 idxSize IDX1{..} = idx1Size
 idxSize IDX2{..} = idx2Size
 
 -- | Nth SHA1
-idxSha1   :: IDX -> Int -> IO BS.ByteString
+idxSha1 :: IDX -> Int -> IO BS.ByteString
 idxSha1 IDX1{..} n
     | n >= idx1Size = outOfRange
     | otherwise     = do
@@ -64,7 +71,7 @@ idxSha1 IDX2{..} n
         BS.packCStringLen (cs, 20)
 
 -- | Nth CRC
-idxCRC    :: IDX -> Int -> IO (Maybe Word32)
+idxCRC :: IDX -> Int -> IO (Maybe Word32)
 idxCRC IDX1{..} n
     | n >= idx1Size = outOfRange
     | otherwise     = return Nothing
@@ -123,10 +130,10 @@ findInPackIndex fp sha = do
 
 dumpIdx :: IDX -> IO ()
 dumpIdx idx@IDX1{..} = do
-    putStrLn "IDX Version 1"
+    putStrLn $ idx1Pack ++ ": IDX Version 1"
     dumpIdx' idx
 dumpIdx idx@IDX2{..} = do
-    putStrLn "IDX Version 2"
+    putStrLn $ idx2Pack ++ ": IDX Version 2"
     dumpIdx' idx
 
 dumpIdx' :: IDX -> IO ()
@@ -160,9 +167,9 @@ readIdx fp = do
         then do
             BE ver <- peekElemOff start 1
             case ver of
-                2 -> mkIDX2 start size
+                2 -> mkIDX2 fp start size
                 _ -> error "Unknown version"
-        else mkIDX1 start size
+        else mkIDX1 fp start size
 
 dumpRawPackIndex :: FilePath -> IO String
 dumpRawPackIndex fp = do
@@ -170,22 +177,24 @@ dumpRawPackIndex fp = do
     dumpIdx idx
     return "Woot"
 
-mkIDX1 :: Ptr (BigEndian Word32) -> Int -> IO IDX
-mkIDX1 start size = do
-    let fanout = start
+mkIDX1 :: FilePath -> Ptr (BigEndian Word32) -> Int -> IO IDX
+mkIDX1 fp start size = do
+    let pack = replaceExtension fp ".pack"
+        fanout = start
     BE n <- peekElemOff fanout 255
     let n' = fromIntegral (n :: Word32)
     let offsets = fanout `plusPtr` (256 * 4)
-    return (IDX1 n' fanout offsets)
+    return (IDX1 pack n' fanout offsets)
 
-mkIDX2 :: Ptr (BigEndian Word32) -> Int -> IO IDX
-mkIDX2 start size = do
-    let fanout = start `plusPtr` (2 * 4)
+mkIDX2 :: FilePath -> Ptr (BigEndian Word32) -> Int -> IO IDX
+mkIDX2 fp start size = do
+    let pack = replaceExtension fp ".pack"
+        fanout = start `plusPtr` (2 * 4)
     BE n <- peekElemOff fanout 255
     let n' = fromIntegral (n :: Word32)
     let sha1s = fanout `plusPtr` (256 * 4)
         crcs = sha1s `plusPtr` (n' * 20)
         offsets = crcs `plusPtr` (n' * 4)
         offset64s = offsets `plusPtr` (n' * 4)
-    return (IDX2 n' fanout sha1s crcs offsets offset64s)
+    return (IDX2 pack n' fanout sha1s crcs offsets offset64s)
     
