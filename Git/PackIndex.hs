@@ -23,6 +23,7 @@ import System.Posix.Types
 import Text.Printf
 
 import Git.SHA
+import Git.Pack
 import Git.Path
 
 ------------------------------------------------------------
@@ -120,9 +121,17 @@ idxFind idx sha = idxFind' 0 (idxSize idx)
 findInPackIndex :: FilePath -> BS.ByteString -> IO ()
 findInPackIndex fp sha = do
     idx <- readIdx fp
-    m <- idxFind idx sha
-    case m of
-        Just (_, i) -> putStrLn $ "Found at index " ++ show i
+    m'i <- idxFind idx sha
+    case m'i of
+        Just (_, i) -> do
+            off <- idxOffset idx i
+            m'po <- packReadObject (idxPack idx) off
+            case m'po of
+                Just PackObject{..} -> do
+                    putStrLn $ "Found at index " ++ show i
+                    putStrLn $ show poType
+                    putStrLn $ show poData
+                Nothing     -> putStrLn $ "Error reading pack"
         Nothing     -> putStrLn $ "Not found"
 
 ------------------------------------------------------------
