@@ -41,6 +41,13 @@ Handle A^^n
 Handle A^n^m
 
 
+Commands
+========
+
+* find redundant upstream branches, ie. stuff that has been merged and can
+be safely deleted.
+
+
 Haskell cruft
 =============
 
