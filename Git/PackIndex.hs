@@ -20,6 +20,7 @@ import System.IO.MMap
 import System.Posix.Types
 import Text.Printf
 
+import Git.SHA
 import Git.Path
 
 ------------------------------------------------------------
@@ -88,6 +89,28 @@ outOfRange :: IO a
 outOfRange = error "Index out of range"
 
 ------------------------------------------------------------
+-- Debugging
+
+dumpIdx :: IDX -> IO ()
+dumpIdx idx@IDX1{..} = do
+    putStrLn "IDX Version 1"
+    dumpIdx' idx
+dumpIdx idx@IDX2{..} = do
+    putStrLn "IDX Version 2"
+    dumpIdx' idx
+
+dumpIdx' :: IDX -> IO ()
+dumpIdx' idx = do
+    putStrLn $ show (idxSize idx) ++ " objects"
+    mapM_ f [0..(idxSize idx)-1]
+    where
+        f i = do
+            o <- fromIntegral <$> idxOffset idx i
+            let o' = printf "0x%04x" (o :: Int)
+            s <- idxSha1 idx i
+            putStrLn $ show i ++ ": " ++ o' ++ " SHA: " ++ showDigestBS s
+
+------------------------------------------------------------
 
 -- | Generate the pathname for a given packfile
 idxPath :: String -> IO FilePath
@@ -109,7 +132,8 @@ dumpRawPackIndex fp = do
                 2 -> mkIDX2 start size
                 _ -> error "Unknown version"
         else mkIDX1 start size
-    return $ "Mapped region offset " ++ (show offset) ++ " size " ++ (show size) ++ " with " ++ show (idxSize idx) ++ " objects"
+    dumpIdx idx
+    return $ "Mapped region offset " ++ (show offset) ++ " size " ++ (show size)
 
 mkIDX1 :: Ptr (BigEndian Word32) -> Int -> IO IDX
 mkIDX1 start size = do
