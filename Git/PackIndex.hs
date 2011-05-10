@@ -48,39 +48,44 @@ idxSize IDX1{..} = idx1Size
 idxSize IDX2{..} = idx2Size
 
 -- | Nth SHA1
-idxSha1   :: IDX -> Int -> IO (Maybe BS.ByteString)
+idxSha1   :: IDX -> Int -> IO BS.ByteString
 idxSha1 IDX1{..} n
-    | n >= idx1Size = return Nothing
+    | n >= idx1Size = outOfRange
     | otherwise     = do
         cs <- peekByteOff idx1Offsets (4 + (n * 24))
-        Just <$> BS.packCStringLen (cs, 20)
+        BS.packCStringLen (cs, 20)
 idxSha1 IDX2{..} n
-    | n >= idx2Size = return Nothing
+    | n >= idx2Size = outOfRange
     | otherwise     = do
         cs <- peekByteOff idx2SHA1s (n * 20)
-        Just <$> BS.packCStringLen (cs, 20)
+        BS.packCStringLen (cs, 20)
 
 -- | Nth CRC
 idxCRC    :: IDX -> Int -> IO (Maybe Word32)
-idxCRC IDX1{}   _ = return Nothing
+idxCRC IDX1{..} n
+    | n >= idx1Size = outOfRange
+    | otherwise     = return Nothing
 idxCRC IDX2{..} n
-    | n >= idx2Size = return Nothing
+    | n >= idx2Size = outOfRange
     | otherwise     = do
         BE crc <- peekElemOff idx2CRCs n
         return (Just crc)
 
 -- | Nth offset
-idxOffset :: IDX -> Int -> IO (Maybe FileOffset)
+idxOffset :: IDX -> Int -> IO FileOffset
 idxOffset IDX1{..} n
-    | n >= idx1Size = return Nothing
+    | n >= idx1Size = outOfRange
     | otherwise     = do
         BE off <- peekByteOff idx1Offsets (n * 24)
-        return . Just . fromIntegral $ (off :: Word32)
+        return . fromIntegral $ (off :: Word32)
 idxOffset IDX2{..} n
-    | n >= idx2Size = return Nothing
+    | n >= idx2Size = outOfRange
     | otherwise     = do
         BE off <- peekElemOff idx2Offsets n
-        return . Just . fromIntegral $ off
+        return . fromIntegral $ off
+
+outOfRange :: IO a
+outOfRange = error "Index out of range"
 
 ------------------------------------------------------------
 
