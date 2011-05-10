@@ -1,11 +1,11 @@
+{-# OPTIONS -fwarn-unused-imports #-}
 module Main where
 
 import Control.Applicative ((<$>))
-import Control.Monad (liftM, when)
 import Control.Monad.Trans (liftIO)
 
 import Data.Default
-import Data.List (intersperse, sort)
+import Data.List (sort)
 
 import UI.Command
 
