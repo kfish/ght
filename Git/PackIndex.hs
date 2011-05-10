@@ -3,6 +3,7 @@
 
 module Git.PackIndex (
         dumpRawPackIndex,
+        findInPackIndex,
 
         -- * Paths
         idxPath
@@ -11,6 +12,7 @@ module Git.PackIndex (
 import Control.Applicative ((<$>))
 import Control.Monad (forM_)
 import qualified Data.ByteString as BS
+import Data.Ord
 import Data.Word (Word32)
 import Foreign.Ptr
 import Foreign.Storable
@@ -89,6 +91,34 @@ outOfRange :: IO a
 outOfRange = error "Index out of range"
 
 ------------------------------------------------------------
+
+idxFind :: IDX -> BS.ByteString -> IO (Maybe (IDX, Int))
+idxFind idx sha = idxFind' 0 (idxSize idx)
+    where
+        idxFind' lo hi
+            | lo == hi = do
+                iSha <- idxSha1 idx lo
+                case (sha `compare` iSha) of
+                    EQ -> return (Just (idx, lo))
+                    _  -> return Nothing
+            | otherwise = do
+                iSha <- idxSha1 idx i
+                case (sha `compare` iSha) of
+                    EQ -> return (Just (idx, i))
+                    LT -> idxFind' lo i
+                    GT -> idxFind' i hi
+            where
+                i = floor ((fromIntegral (lo + hi)) / 2.0)
+
+findInPackIndex :: FilePath -> BS.ByteString -> IO ()
+findInPackIndex fp sha = do
+    idx <- readIdx fp
+    m <- idxFind idx sha
+    case m of
+        Just (_, i) -> putStrLn $ "Found at index " ++ show i
+        Nothing     -> putStrLn $ "Not found"
+
+------------------------------------------------------------
 -- Debugging
 
 dumpIdx :: IDX -> IO ()
@@ -120,21 +150,25 @@ idxPath idx = gitPath ("objects" </> "pack" </> ("pack-" ++ idx ++ ".idx"))
 idxHeader :: Word32
 idxHeader = 0xff744f63
 
-dumpRawPackIndex :: FilePath -> IO String
-dumpRawPackIndex fp = do
+readIdx :: FilePath -> IO IDX
+readIdx fp = do
     (ptr, rawsize, offset, size) <- mmapFilePtr fp ReadOnly Nothing
     let start :: Ptr (BigEndian Word32)
         start = ptr `plusPtr` offset
     BE hdr <- peek start
-    idx <- if (hdr == idxHeader)
+    if (hdr == idxHeader)
         then do
             BE ver <- peekElemOff start 1
             case ver of
                 2 -> mkIDX2 start size
                 _ -> error "Unknown version"
         else mkIDX1 start size
+
+dumpRawPackIndex :: FilePath -> IO String
+dumpRawPackIndex fp = do
+    idx <- readIdx fp
     dumpIdx idx
-    return $ "Mapped region offset " ++ (show offset) ++ " size " ++ (show size)
+    return "Woot"
 
 mkIDX1 :: Ptr (BigEndian Word32) -> Int -> IO IDX
 mkIDX1 start size = do

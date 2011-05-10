@@ -14,6 +14,7 @@ import Git.Commit
 import Git.Pack
 import Git.PackIndex
 import Git.Path
+import Git.SHA
 
 -- show-prefix, show-root use these
 import System.FilePath
@@ -171,6 +172,23 @@ fIdx (idx:_) = do
         else idxPath idx
 
 ------------------------------------------------------------
+-- find-idx
+--
+
+ghtFindIdx = defCmd {
+       	        cmdName = "find-idx",
+                cmdHandler = ghtFindIdxHandler,
+                cmdCategory = "Blob management",
+                cmdShortDesc = "Find a SHA in a pack index",
+                cmdExamples = [("Find SHA1 333fff in pack-abcd.idx", "abcd 333fff")]
+        }
+
+ghtFindIdxHandler = do
+        (fp:sha:_) <- appArgs
+        fp' <- liftIO $ fIdx [fp]
+        liftIO $ findInPackIndex fp' (readDigestBS sha)
+
+------------------------------------------------------------
 -- show-raw
 --
 
@@ -242,7 +260,7 @@ ght = def {
 	        appCategories = ["Reporting", "Blob management"],
 		appSeeAlso = ["git"],
 		appProject = "Ght",
-	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtShowIdx, ghtHashObject, ghtBranch]
+	        appCmds = [ghtShowPrefix, ghtShowRoot, ghtShow, ghtLog, ghtShowRaw, ghtShowPack, ghtShowIdx, ghtFindIdx, ghtHashObject, ghtBranch]
 	}
 
 longDesc = "This is a bunch of trivial routines for inspecting git repositories. It is in no way useful beyond that."
