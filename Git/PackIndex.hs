@@ -108,7 +108,8 @@ dumpIdx' idx = do
             o <- fromIntegral <$> idxOffset idx i
             let o' = printf "0x%04x" (o :: Int)
             s <- idxSha1 idx i
-            putStrLn $ show i ++ ": " ++ o' ++ " SHA: " ++ showDigestBS s
+            c <- maybe "" ((" CRC: " ++) . show) <$> idxCRC idx i
+            putStrLn $ show i ++ ": " ++ o' ++ " SHA: " ++ showDigestBS s ++ c
 
 ------------------------------------------------------------
 
