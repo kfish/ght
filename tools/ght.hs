@@ -3,7 +3,7 @@
 module Main where
 
 import Control.Applicative ((<$>))
-import Control.Monad ((<=<))
+import Control.Monad ((<=<), join)
 import Control.Monad.Trans (liftIO)
 
 import Data.Default
@@ -109,8 +109,7 @@ ghtLogHandler = liftIO . showLog =<< liftIO . findBlob =<< appArgs
 showLog (blob:_)
 	| blob == "" = return ()
 	| otherwise = do
-		d <- readBlob blob
-		let m'pb = prettyLog blob d
+		m'pb <- join . fmap (prettyLog blob) <$> readBlob blob
 		case m'pb of
 			Just c -> do
 				let p = C.concat [commitHeader, C.pack (blob ++ "\n"), commitPretty c]
@@ -169,7 +168,7 @@ ghtFindIdx = defCmd {
 
 ghtFindIdxHandler = do
         (sha:_) <- appArgs
-        liftIO $ findInPackIdxs (readDigestBS sha)
+        liftIO $ print =<< findInPackIdxs (readDigestBS sha)
 
 ------------------------------------------------------------
 -- show-raw
@@ -185,7 +184,7 @@ ghtShowRaw = defCmd {
 
 ghtShowRawHandler = liftIO . showRawBlob =<< liftIO . findBlob =<< appArgs
 
-showRawBlob (blob:_) = L.hPut stdout =<< readBlob blob
+showRawBlob (blob:_) = maybe (putStrLn "Not found") (L.hPut stdout) =<< readBlob blob
 
 ------------------------------------------------------------
 -- show
@@ -201,7 +200,7 @@ ghtShow = defCmd {
 
 ghtShowHandler = liftIO . showBlob =<< liftIO . findBlob =<< appArgs
 
-showBlob (blob:_) = L.hPut stdout =<< prettyBlob blob <$> readBlob blob
+showBlob (blob:_) = maybe (putStrLn "Not found") (C.hPut stdout . prettyBlob blob) =<< readBlob blob
 
 ------------------------------------------------------------
 -- hash-object

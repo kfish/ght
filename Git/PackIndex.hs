@@ -10,6 +10,7 @@ module Git.PackIndex (
 ) where
 
 import Control.Applicative ((<$>))
+import Control.Monad (msum)
 import qualified Data.ByteString as BS
 import Data.Word (Word32)
 import Foreign.Ptr
@@ -112,7 +113,7 @@ idxFind :: IDX -> BS.ByteString -> IO (Maybe (IDX, Int))
 idxFind idx sha = idxFind' 0 (idxSize idx)
     where
         idxFind' lo hi
-            | lo == hi = do
+            | lo >= hi = do
                 iSha <- idxSha1 idx lo
                 case (sha `compare` iSha) of
                     EQ -> return (Just (idx, lo))
@@ -122,30 +123,24 @@ idxFind idx sha = idxFind' 0 (idxSize idx)
                 case (sha `compare` iSha) of
                     EQ -> return (Just (idx, i))
                     LT -> idxFind' lo i
-                    GT -> idxFind' i hi
+                    GT -> idxFind' (i+1) hi
             where
                 i = floor ((fromIntegral (lo + hi)) / 2.0 :: Double)
 
-findInPackIdxs :: BS.ByteString -> IO ()
+findInPackIdxs :: BS.ByteString -> IO (Maybe PackObject)
 findInPackIdxs sha = do
     idxs <- idxFiles
-    mapM_ (findInPackIndex' sha) idxs
+    msum <$> mapM (findInPackIndex' sha) idxs
 
-findInPackIndex' :: BS.ByteString -> FilePath -> IO ()
+findInPackIndex' :: BS.ByteString -> FilePath -> IO (Maybe PackObject)
 findInPackIndex' sha fp = do
     idx <- readIdx fp
     m'i <- idxFind idx sha
     case m'i of
         Just (_, i) -> do
             off <- idxOffset idx i
-            m'po <- packReadObject (idxPack idx) off
-            case m'po of
-                Just PackObject{..} -> do
-                    putStrLn $ "Found at index " ++ show i
-                    putStrLn $ show poType
-                    putStrLn $ show poData
-                Nothing     -> putStrLn $ "Error reading pack"
-        Nothing     -> putStrLn $ "Not found"
+            packReadObject (idxPack idx) off
+        Nothing     -> return Nothing
 
 ------------------------------------------------------------
 -- Debugging

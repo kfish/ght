@@ -9,6 +9,7 @@ module Git.Blob (
 import Codec.Compression.Zlib
 import Control.Applicative ((<$>))
 import Control.Monad
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as C
 import Data.Maybe (listToMaybe)
@@ -16,17 +17,28 @@ import Data.Maybe (listToMaybe)
 -- show-prefix, show-root use these
 import System.FilePath
 import System.Posix.Files
+import System.IO
 
 import Git.Commit
+import Git.Pack
+import Git.PackIndex
 import Git.Path
+import Git.SHA
 
 ------------------------------------------------------------
 
-readBlob :: String -> IO C.ByteString
+readBlob :: String -> IO (Maybe L.ByteString)
 readBlob blob = do
         let (bH,bT) = splitAt 2 blob
         path <- gitPath ("objects" </> bH </> bT)
-        decompress <$> L.readFile path
+        exists <- fileExist path
+        if exists
+            then do
+                Just . decompress <$> C.readFile path
+            else do
+                let sha = readDigestBS blob
+                m'po <- findInPackIdxs sha
+                return $ fmap (packObjectPretty sha) m'po
 
 prettyBlob :: String -> C.ByteString -> C.ByteString
 prettyBlob blob bs

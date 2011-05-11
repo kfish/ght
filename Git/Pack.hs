@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS -Wall #-}
 
 module Git.Pack (
@@ -8,6 +9,7 @@ module Git.Pack (
         PackObjectType,
 
 	packPretty,
+        packObjectPretty,
 
         -- * Iteratee
         packRead,
@@ -144,6 +146,16 @@ packObjectRead = do
 
         castEnum = toEnum . fromEnum
 
+
+packObjectPretty :: ByteString -> PackObject -> L.ByteString
+packObjectPretty sha PackObject{..}
+    | poType == OBJ_COMMIT =
+        C.concat [commitHeader, sha'c, C.pack "\n", poData'c]
+    | otherwise = poData'c
+    where
+        commitHeader = C.pack "commit "
+        sha'c = C.fromChunks [sha]
+        poData'c = C.fromChunks [poData]
 
 ------------------------------------------------------------
 -- packPretty
