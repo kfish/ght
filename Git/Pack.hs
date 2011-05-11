@@ -86,8 +86,9 @@ packReadObject' off = do
     n <- I.heads "PACK"
     if (n == 4)
         then do
-            _ver <- fromIntegral <$> endianRead4 MSB
-            _num <- fromIntegral <$> endianRead4 MSB
+            -- TODO: verify this is a known version, error otherwise
+            -- _ver <- fromIntegral <$> endianRead4 MSB
+            -- _num <- fromIntegral <$> endianRead4 MSB
             I.seek off
             packObjectRead
         else return Nothing

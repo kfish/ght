@@ -10,9 +10,7 @@ module Git.PackIndex (
 ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad (forM_)
 import qualified Data.ByteString as BS
-import Data.Ord
 import Data.Word (Word32)
 import Foreign.Ptr
 import Foreign.Storable
@@ -126,7 +124,7 @@ idxFind idx sha = idxFind' 0 (idxSize idx)
                     LT -> idxFind' lo i
                     GT -> idxFind' i hi
             where
-                i = floor ((fromIntegral (lo + hi)) / 2.0)
+                i = floor ((fromIntegral (lo + hi)) / 2.0 :: Double)
 
 findInPackIdxs :: BS.ByteString -> IO ()
 findInPackIdxs sha = do
@@ -183,7 +181,7 @@ idxHeader = 0xff744f63
 
 readIdx :: FilePath -> IO IDX
 readIdx fp = do
-    (ptr, rawsize, offset, size) <- mmapFilePtr fp ReadOnly Nothing
+    (ptr, _rawsize, offset, size) <- mmapFilePtr fp ReadOnly Nothing
     let start :: Ptr (BigEndian Word32)
         start = ptr `plusPtr` offset
     BE hdr <- peek start
@@ -202,7 +200,7 @@ dumpRawPackIndex fp = do
     return "Woot"
 
 mkIDX1 :: FilePath -> Ptr (BigEndian Word32) -> Int -> IO IDX
-mkIDX1 fp start size = do
+mkIDX1 fp start _size = do
     let pack = replaceExtension fp ".pack"
         fanout = start
     BE n <- peekElemOff fanout 255
@@ -211,7 +209,7 @@ mkIDX1 fp start size = do
     return (IDX1 pack n' fanout offsets)
 
 mkIDX2 :: FilePath -> Ptr (BigEndian Word32) -> Int -> IO IDX
-mkIDX2 fp start size = do
+mkIDX2 fp start _size = do
     let pack = replaceExtension fp ".pack"
         fanout = start `plusPtr` (2 * 4)
     BE n <- peekElemOff fanout 255
