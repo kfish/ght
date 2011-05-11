@@ -139,13 +139,7 @@ ghtShowPack = defCmd {
                 cmdExamples = [("Show raw contents of pack pack-abcd.pack", "abcd")]
         }
 
-ghtShowPackHandler = mapM_ (liftIO . (putStrLn . show <=< packRead <=< fPack)) =<< appArgs
-
-fPack pack = do
-    exists <- doesFileExist pack
-    if exists
-        then return pack
-        else packPath pack
+ghtShowPackHandler = mapM_ (liftIO . (putStrLn . show <=< packRead <=< pathExistOr packPath)) =<< appArgs
 
 ------------------------------------------------------------
 -- show-idx
@@ -159,13 +153,7 @@ ghtShowIdx = defCmd {
                 cmdExamples = [("Show raw contents of pack pack-abcd.idx", "abcd")]
         }
 
-ghtShowIdxHandler = mapM_ (liftIO . (putStrLn <=< dumpRawPackIndex <=< fIdx)) =<< appArgs
-
-fIdx idx = do
-    exists <- doesFileExist idx
-    if exists
-        then return idx
-        else idxPath idx
+ghtShowIdxHandler = mapM_ (liftIO . (putStrLn <=< dumpRawPackIndex <=< pathExistOr idxPath)) =<< appArgs
 
 ------------------------------------------------------------
 -- find-idx

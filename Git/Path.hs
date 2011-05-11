@@ -1,9 +1,13 @@
 {-# OPTIONS -Wall #-}
 
 module Git.Path (
+  -- * Generate paths in git dir
     gitPath
   , gitRoot
   , gitDeref
+
+  -- * General path handling
+  , pathExistOr
 ) where
 
 import Control.Monad ((<=<))
@@ -65,6 +69,18 @@ gitDeref = deref <=< L.readFile <=< gitPath
 		refHeader = C.pack "ref: "
 		refPath = C.unpack (chomp $ L.drop 5 bs)
                 chomp = C.takeWhile (/= '\n')
+
+------------------------------------------------------------
+-- pathExistOr
+
+-- | Return the given path if it exists, else the result of applying the
+-- modifier function
+pathExistOr :: (FilePath -> IO FilePath) -> FilePath -> IO FilePath
+pathExistOr f path = do
+    exists <- doesFileExist path
+    if exists
+        then return path
+        else f path
 
 ------------------------------------------------------------
 -- normalise
