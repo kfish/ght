@@ -1,7 +1,9 @@
 {-# OPTIONS -fwarn-unused-imports #-}
+
 module Main where
 
 import Control.Applicative ((<$>))
+import Control.Monad ((<=<))
 import Control.Monad.Trans (liftIO)
 
 import Data.Default
@@ -160,12 +162,9 @@ ghtShowIdx = defCmd {
                 cmdExamples = [("Show raw contents of pack pack-abcd.idx", "abcd")]
         }
 
-ghtShowIdxHandler = do
-        idx <- (liftIO . fIdx =<< appArgs)
-        x <- liftIO $ dumpRawPackIndex idx
-	liftIO $ putStrLn x
+ghtShowIdxHandler = mapM_ (liftIO . (putStrLn <=< dumpRawPackIndex <=< fIdx)) =<< appArgs
 
-fIdx (idx:_) = do
+fIdx idx = do
     exists <- doesFileExist idx
     if exists
         then return idx
