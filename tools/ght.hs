@@ -139,12 +139,9 @@ ghtShowPack = defCmd {
                 cmdExamples = [("Show raw contents of pack pack-abcd.pack", "abcd")]
         }
 
-ghtShowPackHandler = do
-        pack <- (liftIO . fPack =<< appArgs)
-        x <- liftIO $ packRead pack
-	liftIO $ putStrLn (show x)
+ghtShowPackHandler = mapM_ (liftIO . (putStrLn . show <=< packRead <=< fPack)) =<< appArgs
 
-fPack (pack:_) = do
+fPack pack = do
     exists <- doesFileExist pack
     if exists
         then return pack
