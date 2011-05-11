@@ -5,6 +5,10 @@ Git wrangling
 Pack files
 ----------
 
+  * verify version numbers of pack is known
+
+  * verify offsets for idx are within mmap'ped size
+
   * track file offsets of pack objects
 
   * verify idx offsets vs. pack parse
