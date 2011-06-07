@@ -11,6 +11,7 @@ module Git.PackIndex (
 
 import Control.Applicative ((<$>))
 import Control.Monad (msum)
+import Data.Bits (shiftR)
 import qualified Data.ByteString as BS
 import Data.Word (Word32)
 import Foreign.Ptr
@@ -126,7 +127,7 @@ idxFind idx sha = idxFind' 0 (idxSize idx)
                     LT -> idxFind' lo i
                     GT -> idxFind' (i+1) hi
             where
-                i = floor ((fromIntegral (lo + hi)) / 2.0 :: Double)
+                i = shiftR (lo + hi) 1
 
 findInPackIdxs :: BS.ByteString -> IO (Maybe PackObject)
 findInPackIdxs sha = do
