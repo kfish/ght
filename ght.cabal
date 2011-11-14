@@ -22,7 +22,7 @@ library
                      old-locale,
                      time,
                      iteratee,
-                     iteratee-compress,
+                     iteratee-compress >= 0.3.0.0 && < 0.4,
                      mmap,
                      storable-endian
     Exposed-Modules: Git.Blob

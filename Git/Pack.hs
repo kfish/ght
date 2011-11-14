@@ -104,7 +104,7 @@ packObjectRead = do
                then readSize 4 sz
                else return sz
     t' <- readBase t
-    d <- I.joinIM $ enumInflate Zlib defaultDecompressParams I.stream2stream
+    d <- I.joinI $ enumInflate Zlib defaultDecompressParams I.stream2stream
     return $ PackObject <$> t' <*> pure sz' <*> pure d
     where
         parseOBJ :: Word8 -> Maybe PackObjectType
