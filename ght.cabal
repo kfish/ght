@@ -1,54 +1,79 @@
 Name:                ght
+
 Version:             0.4.0
+
+Synopsis:            Trivial routines for inspecting git repositories
+
+Description:
+    This is a bunch of trivial routines for inspecting git repositories.
+    It is in no way useful beyond that.
+
 License:             GPL
 License-file:        GPL-2
 Author:              Conrad Parker <conrad@metadecks.org>
 Maintainer:          Conrad Parker <conrad@metadecks.org>
-Category:            Development
-Synopsis:            Trivial routines for inspecting git repositories
-Description:         This is a bunch of trivial routines for inspecting git
-                     repositories. It is in no way useful beyond that.
 Stability:           experimental
-Build-Type:          Simple
+Category:            Development
+
 Cabal-Version:       >= 1.6
+Build-Type:          Simple
+
+flag splitBase
+  description: Use the split-up base package.
 
 ------------------------------------------------------------
 library
-    Build-Depends:   base < 5,
-                     data-default,
-                     bytestring,
-                     binary,
-                     SHA,
-                     old-locale,
-                     time,
-                     iteratee,
-                     iteratee-compress >= 0.3.0.0 && < 0.4,
-                     mmap,
-                     storable-endian
-    Exposed-Modules: Git.Blob
-                     Git.Commit
-                     Git.Pack
-                     Git.PackIndex
-                     Git.Path
-                     Git.SHA
+  if flag(splitBase)
+    build-depends:
+      base >= 3 && < 6
+  else
+    build-depends:
+      base < 3
+
+  Build-Depends:
+    data-default,
+    bytestring,
+    binary,
+    SHA,
+    old-locale,
+    time,
+    iteratee,
+    iteratee-compress >= 0.3.0.0 && < 0.4,
+    mmap,
+    storable-endian
+  Exposed-Modules:
+    Git.Blob
+    Git.Commit
+    Git.Pack
+    Git.PackIndex
+    Git.Path
+    Git.SHA
 
 ------------------------------------------------------------
 -- ght tool
 --
 
 Executable ght
-    Main-Is:         ght.hs
-    Hs-Source-Dirs:  ., tools
-    Build-Depends:   base < 5,
-                     bytestring,
-                     data-default,
-                     directory,
-                     filepath,
-                     mtl >= 2.0.0.0 && < 3,
-                     SHA,
-                     ui-command,
-                     unix,
-                     zlib
+  Main-Is:         ght.hs
+  Hs-Source-Dirs:  ., tools
+
+  if flag(splitBase)
+    build-depends:
+      base >= 3 && < 6
+  else
+    build-depends:
+      base < 3
+
+  Build-Depends:
+    bytestring,
+    data-default,
+    directory,
+    filepath,
+    mtl >= 2.0.0.0 && < 3,
+    SHA,
+    ui-command,
+    unix,
+    zlib
 
 ------------------------------------------------------------------------
 -- Git repo
