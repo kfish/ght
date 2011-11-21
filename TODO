@@ -2,6 +2,11 @@
 Git wrangling
 =============
 
+Log
+---
+
+Follow all parents of merges in log (zipper?)
+
 Pack files
 ----------
 
@@ -56,6 +61,7 @@ Haskell cruft
 =============
 
 Use a left-fold enumerator for following branch histories
+Traverse with a zipper, as IO traversable history
 
 
 Reference
