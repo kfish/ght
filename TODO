@@ -2,6 +2,11 @@
 Git wrangling
 =============
 
+Status
+------
+
+Display current operation state: in rebase, bisect etc.
+
 Log
 ---
 
